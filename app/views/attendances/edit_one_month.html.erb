@@ -18,7 +18,23 @@
           <%= f.fields_for "attendances[]", day do |attendance| %>
             <tr>
               <td><%= l(day.worked_on, format: :short) %></td>
-              <td><%= $days_of_the_week[day.worked_on.wday] %></td>
+              <td>
+                  <% if day.worked_on.wday == 6 %>
+                    <font color="blue">土</font>
+                  <% elsif day.worked_on.wday == 0 %>
+                    <font color="red">日</font>
+                  <% elsif day.worked_on.wday == 1 %>
+                    <font color="black">月</font>
+                  <% elsif day.worked_on.wday == 2 %>
+                    <font color="black">火</font>
+                  <% elsif day.worked_on.wday == 3 %>
+                    <font color="black">水</font>
+                  <% elsif day.worked_on.wday == 4 %>
+                    <font color="black">木</font>
+                  <% elsif day.worked_on.wday == 5 %>
+                    <font color="black">金</font>
+                  <% end %>            
+              </td>
               <% if !current_user.admin? && (Date.current < day.worked_on) %>
               <td><%= attendance.time_field :started_at, readonly: true, class: "form-control" %></td>
               <td><%= attendance.time_field :finished_at, readonly: true, class: "form-control" %></td>
@@ -41,6 +57,6 @@
   
   <div class="center">
     <%= link_to "キャンセル", user_path(date: @first_day), class: "btn btn-lg btn-default" %>
-    <%= f.submit "編集を保存する", class: "btn btn-lg btn-default" %>
+    <%= f.submit "編集を保存する", class: "btn btn-lg btn-primary" %>
   </div>
 <% end %>

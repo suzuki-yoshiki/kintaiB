@@ -15,4 +15,10 @@ module AttendancesHelper
     format("%.2f", (((finish - start) / 60) / 60.0))
   end
   
+  
+  
+  def format_min(time)
+    format("%.2d",(((time.min) / 15) * 15))
+  end
+  
 end
