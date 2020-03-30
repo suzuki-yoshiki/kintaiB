@@ -4,10 +4,17 @@ class UsersController < ApplicationController
   before_action :correct_user, only: [:edit, :update]
   before_action :admin_user, only: [:destroy, :edit_basic_info, :update_basic_info]
   before_action :set_one_month, only: :show
-  
+  before_action :admin_or_correct_user, only: [:index, :show, :edit_one_month]
   
     def index
-      @users = User.paginate(page: params[:page])
+      #条件分岐
+      @users = if params[:search]
+      #searchされた場合は、原文+.where('name LIKE ?', "%#{params[:search]}%")を実行
+      User.paginate(page: params[:page]).search(params[:search])
+        else
+      #searchされていない場合は、原文そのまま
+      User.paginate(page: params[:page], per_page: 20)
+        end
     end
     
     def show
@@ -69,6 +76,17 @@ class UsersController < ApplicationController
     
     def basic_info_params
       params.require(:user).permit(:department, :basic_time, :work_time)
+    end
+    
+     # beforeフィルター
+
+    # 管理権限者、または現在ログインしているユーザーを許可します。
+    def admin_or_correct_user
+      User.paginate(page: params[:page], per_page: 20)
+      unless current_user.admin? || current_user?(@user)
+        flash[:danger] = "権限がありません。"
+        redirect_to(root_url)
+      end  
     end
 end 
     

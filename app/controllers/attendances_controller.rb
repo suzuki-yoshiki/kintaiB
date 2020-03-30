@@ -12,21 +12,29 @@ class AttendancesController < ApplicationController
   def update
     @user = User.find(params[:user_id])
     @attendance = Attendance.find(params[:id])
-    # 出勤時間が未登録であることを判定します。
+    # 出勤時間が未登録であることを判別
+    
     if @attendance.started_at.nil?
+     
       if @attendance.update_attributes(started_at: Time.current.change(sec: 0))
+        
         flash[:info] = "おはようございます！"
       else
         flash[:danger] = UPDATE_ERROR_MSG
       end
     elsif @attendance.finished_at.nil?
+   
       if @attendance.update_attributes(finished_at: Time.current.change(sec: 0))
+       
         flash[:info] = "お疲れ様でした。"
+        
       else
         flash[:danger] = UPDATE_ERROR_MSG
+       
       end
     end
     redirect_to @user
+  
   end
   
   def edit_one_month
@@ -36,15 +44,25 @@ class AttendancesController < ApplicationController
     ActiveRecord::Base.transaction do # トランザクションを開始します。
       attendances_params.each do |id, item|
         attendance = Attendance.find(id)
+        if item[:finished_at].present? && item[:started_at].blank?
+            flash[:danger] = "出勤時間が入力されてません"
+            redirect_to attendances_edit_one_month_user_url(date: params[:date]) and return
+        elsif item[:finished_at].blank? && item[:started_at].present?
+            flash[:danger] = "退勤時間が入力されてません"
+            redirect_to attendances_edit_one_month_user_url(date: params[:date]) and return
+        end
         attendance.update_attributes!(item)
-      end
-    end
-    flash[:success] = "1ヶ月分の勤怠情報を更新しました。"
-    redirect_to user_url(date: params[:date])
-  rescue ActiveRecord::RecordInvalid # トランザクションによるエラーの分岐です。
-    flash[:danger] = "無効な入力データがあった為、更新をキャンセルしました。"
-    redirect_to attendances_edit_one_month_user_url(date: params[:date])
+        end
+        flash[:success] = "1ヶ月分の勤怠情報を更新しました。"
+        redirect_to user_url(date: params[:date]) and return
+        rescue ActiveRecord::RecordInvalid # トランザクションによるエラーの分岐です。
+            flash[:danger] = "無効な入力データがあった為、更新をキャンセルしました。"
+        end
+        redirect_to attendances_edit_one_month_user_url(date: params[:date]) and return
   end
+    
+    
+  
   
   private
     # 1ヶ月分の勤怠情報を扱います。

@@ -1,20 +1,15 @@
-<% provide(:title, 'All Users') %>
-
 <h1>ユーザー一覧</h1>
-
   <div class="row">
     <div class="col-md-10 col-md-offset-8">
         <p>ユーザー名検索</p>
-          <%= form_with(model: @user,  method: :get, local: true) do |form| %>
+          <%= form_with(model: @user, url: search_path(@user), local: true, method: :get) do |f| %>
             <%= text_field_tag :search %>
             <%= submit_tag '検索', :name => nil, class: "btn btn-primary" %>
           <% end %>
     </div>
   </div>
-  
- <div class = "row">
   <div class="col-md-10 col-md-offset-1">
-  <%= will_paginate %>
+  
   <table class="table table-condensed table-hover" id="table-users">
     <thead>
       <tr>
@@ -26,7 +21,6 @@
         <% end %>
       </tr>
     </thead>
-    
 
     <% @users.each do |user| %>
       <tr>
@@ -52,11 +46,5 @@
       </tr>
     <% end %>
   </table>
-  <%= will_paginate %>
-  </div>
+  
 </div>
-
-<!--モーダルウインドウ表示-->
-<div id="edit-basic-info" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
-
-
