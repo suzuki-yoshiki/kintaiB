@@ -1,0 +1,54 @@
+<% provide(:class_text, 'basic-info') %>
+<% provide(:button_text, '変更を送信') %>
+
+<div class="modal-dialog modal-lg modal-dialog-center">
+  <div class="modal-content">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <h1 class="modal-title">【残業申請】</h1>
+    </div>
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+          <%= form_with(model: @attendance, url: attendances_update_over_time_user_path(@user, @attendance), local: true, method: :patch) do |f| %>
+            <%= f.hidden_field :id, :value => @attendance.id %>
+            <%= f.hidden_field :user_id, :value => @user.id %>
+          <table class="table table-bordered table-condensed user-table">
+           <thead> 
+            <tr>
+              <td>日付</td>
+              <td>曜日</td>
+              <td>終了予定時間</td>
+              <td>翌日</td>
+              <td>業務処理内容</td>
+              <td>指示者確認</td>
+            </tr>
+           </thead>
+           <tbody>
+            <tr>
+              <td><%= l(@attendance.worked_on, format: :short) %></td>
+              <td><%= $days_of_the_week[@attendance.worked_on.wday] %></td>
+              <td><%= f.time_field :plan_finished_at, class: "form-control" %></td>
+              <td></td>
+              <td><%= f.text_field :business_process_content, class: "form-control" %></td>
+              <td><%= f.select :instructor_confirmation, [["選択してください"],["上長A"],["上長B"],["上長C"]] %></td>
+            </tr>
+           </tbody>
+          </table>
+            <div class="center">
+              <%= f.submit yield(:button_text), class: "btn btn-primary btn-#{yield(:class_text)}" %>
+              <button type="button" class="btn btn-default btn-<%= yield(:class_text) %>" data-dismiss="modal">
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    </table>
+    <% end %>
+  </div>
+</div>

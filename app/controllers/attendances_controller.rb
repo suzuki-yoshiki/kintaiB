@@ -13,28 +13,37 @@ class AttendancesController < ApplicationController
     @user = User.find(params[:user_id])
     @attendance = Attendance.find(params[:id])
     # 出勤時間が未登録であることを判別
-    
     if @attendance.started_at.nil?
-     
       if @attendance.update_attributes(started_at: Time.current.change(sec: 0))
-        
         flash[:info] = "おはようございます！"
       else
         flash[:danger] = UPDATE_ERROR_MSG
       end
     elsif @attendance.finished_at.nil?
-   
       if @attendance.update_attributes(finished_at: Time.current.change(sec: 0))
-       
         flash[:info] = "お疲れ様でした。"
-        
       else
         flash[:danger] = UPDATE_ERROR_MSG
-       
       end
     end
     redirect_to @user
+  end
   
+  def show_work_time
+    @attendances = Attendance.all
+    respond_to do |format|
+     format.html do
+      #html用の処理を書く
+     end 
+      format.csv do
+         send_data render_to_string, filename: "show_work_time.csv", type: :csv
+      end
+    end
+  end
+  
+  def edit_over_time
+    @user = User.find(params[:id])
+    @attendance = Attendance.find(params[:id])
   end
   
   def edit_one_month

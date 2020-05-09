@@ -10,7 +10,12 @@ class User < ApplicationRecord
                     format: { with: VALID_EMAIL_REGEX },
                     uniqueness: true
   #値が空文字""の場合バリデーションをスルーします。                  
-  validates :department, length: { in: 2..50 }, allow_blank: true                  
+  validates :affiliation, length: { in: 2..50 }, allow_blank: true
+  validates :designated_work_start_time, presence: true, allow_blank: true
+  validates :designated_work_end_time, presence: true, allow_blank: true
+  validates :basic_work_time, presence: true, allow_blank: true
+  validates :uid, presence: true, allow_blank: true
+  validates :employee_number, presence: true, allow_blank: true
   validates :basic_time, presence: true
   validates :work_time, presence: true
   has_secure_password
@@ -57,4 +62,21 @@ class User < ApplicationRecord
       all #全て表示。User.は省略
     end
   end
+  
+  def self.import(file)
+    CSV.foreach(file.path, headers: true) do |row|
+      # IDが見つかれば、レコードを呼び出し、見つかれなければ、新しく作成
+      user = new
+      #user = find_by(id: row["id"]) || new
+      # CSVからデータを取得し、設定する
+      user.attributes = row.to_hash.slice(*updatable_attributes)
+      # 保存する
+      user.save!
+    end
+  end
+
+  # 更新を許可するカラムを定義
+  def self.updatable_attributes
+    ["name", "email", "affiliation", "employee_number", "uid", "basic_work_time", "designated_work_start_time", "designated_work_end_time", "superior", "admin", "password"]
+  end  
 end

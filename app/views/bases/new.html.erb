@@ -1,0 +1,23 @@
+<% provide(:class_text, 'basic-info') %>
+<% provide(:button_text, '拠点追加') %>
+ <h1>拠点情報作成</h1>
+      <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+          <%= form_with(model: @base, url: bases_path, local: true, method: :post) do |f| %>
+            
+            <%= f.label :base_name, class: "label-#{yield(:class_text)}" %>
+            <%= f.text_field :base_name, class: "form-control" %>
+
+            <%= f.label :base_number, class: "label-#{yield(:class_text)}" %>
+            <%= f.number_field :base_number, class: "form-control" %>
+
+            <%= f.label :base_type, class: "label-#{yield(:class_text)}" %>
+            <%= f.text_field :base_type, class: "form-control" %>
+            
+              <%= f.submit yield(:button_text), class: "btn btn-primary btn-#{yield(:class_text)}" %>
+              <button type="button" class="btn btn-default btn-<%= yield(:class_text) %>">
+                キャンセル
+              </button>
+          <% end %>
+        </div>
+      </div>

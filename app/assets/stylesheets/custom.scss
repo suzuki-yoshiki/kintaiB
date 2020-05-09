@@ -100,3 +100,19 @@ p {
 .modal-dialog-center {
   padding-top: 10%;
 }
+
+.box1 {
+    padding: 0.1em 0.5em;
+    margin: 1em 0;
+    font-weight: bold;
+    border: solid 2px #FF0000;
+    color: red;
+}
+.box1:hover {
+  color: #FF0000;
+}
+
+.box1 p {
+    margin: 0; 
+    padding: 0;
+}

@@ -17,6 +17,29 @@ class UsersController < ApplicationController
         end
     end
     
+    def import
+      # fileはtmpに自動で一時保存される
+      if params[:file].blank?
+         flash[:danger] = "CSVファイルが選択されてません。"
+      else User.import(params[:file])
+         flash[:success] = "インポートしました。"
+      end
+         redirect_to users_url
+    end
+    
+    def attendance_work
+       @work_users = []
+        User.all.each do |user|
+          if user.attendances.any?{|a|
+            (Date.today && 
+            a.started_at.present? && 
+            a.finished_at.blank?)}
+          @work_users.push(user)
+          end
+        end
+    end   
+    
+    
     def show
       @worked_sum = @attendances.where.not(started_at: nil).count
     end
@@ -58,7 +81,7 @@ class UsersController < ApplicationController
     end
   
     def update_basic_info
-      if @user.update_attributes(basic_info_params)
+      if @user.update_attributes(user_info_params)
        # 更新成功時の処理
        flash[:success] = "#{@user.name}の基本情報を更新しました。"
       else
@@ -71,11 +94,11 @@ class UsersController < ApplicationController
   private
 
     def user_params
-      params.require(:user).permit(:name, :email, :department, :password, :password_confirmation)
+      params.require(:user).permit(:name, :email, :affiliation, :employee_number, :uid, :password, :password_confirmation)
     end
     
-    def basic_info_params
-      params.require(:user).permit(:department, :basic_time, :work_time)
+    def user_info_params
+      params.permit(:name, :email, :password, :affiliation, :employee_number, :uid, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
     end
     
      # beforeフィルター

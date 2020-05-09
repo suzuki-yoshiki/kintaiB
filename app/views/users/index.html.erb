@@ -1,4 +1,6 @@
 <% provide(:title, 'All Users') %>
+<% provide(:class_text, 'signup') %>
+<% provide(:button_text, '更新') %>
 
 <h1>ユーザー一覧</h1>
 
@@ -12,51 +14,73 @@
     </div>
   </div>
   
- <div class = "row">
-  <div class="col-md-10 col-md-offset-1">
-  <%= will_paginate %>
-  <table class="table table-condensed table-hover" id="table-users">
-    <thead>
-      <tr>
-        <th><%= User.human_attribute_name :name %></th>
-        <th class="center"><%= User.human_attribute_name :department %></th>
+  <%= form_tag import_users_path, multipart: true do  %>
+    <%= file_field_tag :file %>
+    <%= submit_tag "CSVをインポート", class: "btn btn-primary" %>
+  <% end %>
+  
+<table class="table table-condensed table-hover" id="table-users">
+  <p>Example</p>
+   <% @users.each do |user| %>
+    <tr>
+      <td>
         <% if current_user.admin? %>
-          <th class="center"><%= User.human_attribute_name :basic_time %></th>
-          <th class="center"><%= User.human_attribute_name :work_time %></th>
+          <%= link_to user.name, user %>
+        <% else %>
+          <%= user.name %>
         <% end %>
-      </tr>
-    </thead>
-    
-
-    <% @users.each do |user| %>
-      <tr>
-        <td>
-          <% if current_user.admin? %>
-            <%= link_to user.name, user %>
-          <% else %>
-            <%= user.name %>
-          <% end %>
-        </td>
-        <td class="center"><%= user.department.present? ? user.department : "未所属" %></td>
-        <% if current_user.admin? %>
-          <td class="center"><%= format_basic_info(user.basic_time) %></td>
-          <td class="center"><%= format_basic_info(user.work_time) %></td>
-        <% end %>
-        <td class="center">
-          <% if current_user.admin? && !current_user?(user) %>
-            <%= link_to "基本情報編集", edit_basic_info_user_path(user), remote: true, class: "btn btn-success" %>
-            <%= link_to "削除", user, method: :delete,
-                data: { confirm: "削除してよろしいですか？" }, class: "btn btn-danger" %>
-          <% end %>
-        </td>
-      </tr>
+      <% if current_user.admin? && !current_user?(user) %>
+       <br>| <%= link_to "削除", user, method: :delete,
+              data: { confirm: "削除してよろしいですか？" }, class: "btn btn-primary" %>
+       </p>
+   <div class="panel-group">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <button type="button" data-toggle="collapse" data-target="#collapse<%= user.id %>" class="btn btn-primary btn-lg">編集</button>
+        </h4>
+      </div>
+    <div id="collapse<%= user.id %>" class="panel-collapse collapse">
+      <div class="panel-body">
+              <%= form_with(model: @user, url: update_basic_info_user_path(user), local: true, method: :patch) do |f| %>
+               
+              
+                <%= f.label :name, class: "label-#{yield(:class_text)}" %>
+                <%= f.text_field :name, class: "form-control" %>
+              
+                <%= f.label :email, class: "label-#{yield(:class_text)}" %>
+                <%= f.email_field :email, class: "form-control" %>
+                
+                <%= f.label :affiliation, class: "label-#{yield(:class_text)}" %>
+                <%= f.text_field :affiliation, class: "form-control" %>
+                
+                <%= f.label :employee_number, class: "label-#{yield(:class_text)}" %>
+                <%= f.text_field :employee_number, class: "form-control" %>
+                
+                <%= f.label :uid, class: "label-#{yield(:class_text)}" %>
+                <%= f.text_field :uid, class: "form-control" %>
+                
+                <%= f.label :password, class: "label-#{yield(:class_text)}" %>
+                <%= f.password_field :password, class: "form-control" %>
+                
+                <%= f.label :basic_work_time, class: "label-#{yield(:class_text)}" %>
+                <%= f.time_field :basic_work_time, class: "form-control" %>
+              
+                <%= f.label :designated_work_start_time, class: "label-#{yield(:class_text)}" %>
+                <%= f.time_field :designated_work_start_time, class: "form-control" %>
+                
+                <%= f.label :designated_work_end_time, class: "label-#{yield(:class_text)}" %>
+                <%= f.time_field :designated_work_end_time, class: "form-control" %>
+              
+                <%= f.submit yield(:button_text), class: "btn btn-primary btn-block btn-#{yield(:class_text)}" %>
+              <% end %>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+      <% end %>
     <% end %>
-  </table>
-  <%= will_paginate %>
-  </div>
-</div>
-
-<!--モーダルウインドウ表示-->
-<div id="edit-basic-info" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"></div>
-
-
+   </td>
+  </tr>
+</table>
