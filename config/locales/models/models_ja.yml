@@ -8,6 +8,8 @@ ja:
           id: ID
           name: 名前
           email: メールアドレス
+          employee_number: 社員番号
+          uid: カードID          
           affiliation: 所属
           basic_time: 基本時間
           work_time: 勤務時間
@@ -22,6 +24,7 @@ ja:
           worked_on: 日付
           started_at: 出勤時間
           finished_at: 退勤時間
+          finished_plan_at: 終了予定時間
           note: 備考
           user: ユーザーID
         base:

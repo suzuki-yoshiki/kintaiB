@@ -28,13 +28,14 @@ class ApplicationController < ActionController::Base
     
       # システム管理権限所有かどうか判定します。
     def admin_user
-          redirect_to root_url unless current_user.admin?
+      redirect_to root_url unless current_user.admin?
     end
 
   
     # ページ出力前に1ヶ月分のデータの存在を確認・セットします。
-    def set_one_month 
+    def set_one_month
       @first_day = params[:date].nil? ?
+      
       Date.current.beginning_of_month : params[:date].to_date
       @last_day = @first_day.end_of_month
       one_month = [*@first_day..@last_day] # 対象の月の日数を代入します。

@@ -21,4 +21,8 @@ module AttendancesHelper
     format("%.2d",(((time.min) / 15) * 15))
   end
   
+  def tommorrow_times
+    format("%.2f", (((finish - start) / 60) / 60.0) + 24)
+  end
+  
 end

@@ -18,18 +18,21 @@ Rails.application.routes.draw do
       get 'attendances/show_work_time'      
       get 'attendances/edit_one_month'
       patch 'attendances/update_one_month'
-      get 'attendances/edit_over_time'  #残業申請
-      patch 'attendances/update_over_time'
-      get 'attendances/edit_request_one_month' #所属長承認申請のお知らせ
-      patch 'attendances/update_request_one_month'
-      get 'attendances/edit_change_request'   #勤怠変更申請のお知らせ
-      patch 'attendances/update_change_request'
-      get 'attendances/edit_request_overtime' #残業申請のお知らせ
-      patch 'attendances/update_request_overtime'
       get 'attendances/edit_log' #勤怠ログ
     end
-    resources :attendances, only: :update
+  resources :attendances, only: :update do
+    member do
+      get 'edit_overtime_info'  #残業申請
+      patch 'request_overtime'
+      get 'apploval_one_month_info' #所属長承認申請のお知らせ
+      patch 'apploval_one_month'
+      get 'change_request_info'   #勤怠変更申請のお知らせ
+      patch 'change_request'
+      get 'new_overtime_info' #残業申請のお知らせ
+      patch 'request_overtime'
     end
-    resources :bases do
     end
+  end
+  resources :bases do
+  end
 end

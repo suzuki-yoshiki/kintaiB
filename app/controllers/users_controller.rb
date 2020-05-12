@@ -41,7 +41,10 @@ class UsersController < ApplicationController
     
     
     def show
+      @attendance = Attendance.find(params[:id])
       @worked_sum = @attendances.where.not(started_at: nil).count
+      @all_attendance = Attendance.all
+      @over_time =  @all_attendance.where.not(finished_plan_at: nil).where(mark_instructor_confirmation: "申請中").count
     end
     
     def new

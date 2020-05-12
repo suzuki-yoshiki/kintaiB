@@ -1,5 +1,5 @@
 <% provide(:class_text, 'basic-info') %>
-<% provide(:button_text, '変更を送信') %>
+<% provide(:button_text, '変更を申請する') %>
 
 <div class="modal-dialog modal-lg modal-dialog-center">
   <div class="modal-content">
@@ -12,9 +12,7 @@
     <div class="modal-body">
       <div class="row">
         <div class="col-md-6 col-md-offset-3">
-          <%= form_with(model: @attendance, url: attendances_update_over_time_user_path(@user, @attendance), local: true, method: :patch) do |f| %>
-            <%= f.hidden_field :id, :value => @attendance.id %>
-            <%= f.hidden_field :user_id, :value => @user.id %>
+          <%= form_with(model: @attendance, url: request_overtime_user_attendance_path(@user, @attendance), local: true, method: :patch) do |f| %>
           <table class="table table-bordered table-condensed user-table">
            <thead> 
             <tr>
@@ -30,10 +28,11 @@
             <tr>
               <td><%= l(@attendance.worked_on, format: :short) %></td>
               <td><%= $days_of_the_week[@attendance.worked_on.wday] %></td>
-              <td><%= f.time_field :plan_finished_at, class: "form-control" %></td>
-              <td></td>
+              <td><%= f.time_field :finished_plan_at, class: "form-control" %></td>
+              <td><%= f.check_box :tomorrow, id: "remember-me" %></td>
               <td><%= f.text_field :business_process_content, class: "form-control" %></td>
-              <td><%= f.select :instructor_confirmation, [["選択してください"],["上長A"],["上長B"],["上長C"]] %></td>
+              <td><%= f.select :instructor_confirmation, Attendance.instructor_confirmations.keys.to_a, { include_blank: true } %></td>
+              <td><%= f.hidden_field :mark_instructor_confirmation, value: "申請中" %></td>
             </tr>
            </tbody>
           </table>
@@ -42,13 +41,12 @@
               <button type="button" class="btn btn-default btn-<%= yield(:class_text) %>" data-dismiss="modal">
                 キャンセル
               </button>
-            </div>
-          </div>
+             </div>
+           </div>
+         </div>
         </div>
+       </div>
       </div>
-    </div>
-    </div>
-    </table>
     <% end %>
   </div>
 </div>
