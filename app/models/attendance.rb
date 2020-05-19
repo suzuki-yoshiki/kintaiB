@@ -1,9 +1,10 @@
 class Attendance < ApplicationRecord
   belongs_to :user
   
-  enum instructor_confirmation: { "上長A" => 1, "上長B" => 2, "上長C" => 3 }
-  enum mark_instructor_confirmation: { "なし" => 1, "申請中" => 2, "承認" => 3, "否認" => 4 }
-
+  enum mark_instructor_confirmation: { "なし" => 1, "申請中" => 2, "承認" => 3, "否認" => 4 }, _prefix: true
+  enum mark_change_confirmation: { "なし" => 1, "申請中" => 2, "承認" => 3, "否認" => 4 }, _prefix: true
+  enum mark_apploval_confirmation: { "なし" => 1, "申請中" => 2, "承認" => 3, "否認" => 4 }  , _prefix: true
+  
   validates :worked_on, presence: true
   validates :note, length: { maximum: 50 }
 

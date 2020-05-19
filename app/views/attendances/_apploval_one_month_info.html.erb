@@ -7,40 +7,42 @@
       <button type="button" class="close" data-dismiss="modal" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
-      <h1 class="modal-title">【<%= @user.name %>からの１ヶ月分勤怠申請】</h1>
     </div>
-    <div class="modal-body">
-      <div class="row">
-        <div class="col-md-10 col-md-offset-1">
-          <table class="table table-bordered table-condensed user-table">
-           <%= form_with(model: @attendance, url: apploval_one_month_user_attendance_path, local: true) do |f| %>
-             <thead>
-              <tr>
-                <td>月</td>
-                <td>指示者確認</td>
-                <td>変更</td>
-                <td>勤怠を確認する</td>
-              </tr>
-             </thead>
-             <tbody>
-              <tr>
-                <td><%= l(@attendance.worked_on, format: :month) %></td>
-                <td><%= f.select :mark_instructor_confirmation, [["なし"],["申請中"],["承認"],["否認"]], class: "form-control" %></td>
-                <td></td>
-                <td><%= link_to "確認", "#", class: "btn btn-primary" %></td>
-              </tr>
-             </tbody>
-           </table>
-              <div class="center">
-                <%= f.submit yield(:button_text), class: "btn btn-primary btn-#{yield(:class_text)}" %>
-                <button type="button" class="btn btn-default btn-<%= yield(:class_text) %>" data-dismiss="modal">
-                  キャンセル
-                </button>
+    <%= form_with(model: @user, url: apploval_one_month_user_attendance_path, local: true, method: :patch) do |f| %>
+     <% @user.each do |user| %>
+           <h1 class="modal-title">【<%= user.name %>からの１ヶ月分勤怠申請】</h1>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-10 col-md-offset-1">
+                  <table class="table table-bordered table-condensed user-table">
+                         <thead>
+                          <tr>
+                            <td>月</td>
+                            <td>指示者確認</td>
+                            <td>変更</td>
+                            <td>勤怠を確認する</td>
+                          </tr>
+                         </thead>
+                         <tbody>
+                         <% @attendance.each do |date| %>
+                          <%= f.fields_for "attendances[]", date do |i| %>
+                              <tr>
+                                <td><%= l(date.worked_on, format: :month) if date.apploval_month.present? %>月</td>
+                                <td><%= f.select :mark_apploval_confirmation, Attendance.mark_apploval_confirmations.keys.to_a, { include_blank: true } %></td>
+                                <td><%= f.check_box :change, id: "remember-me" %></td>
+                                <td><%= link_to "確認", "#", class: "btn btn-primary" %></td>
+                              </tr>
+                        </tbody>
+                      <% end %>
+                     <% end %>
+                  </table>
+                </div>
               </div>
-           <% end %>
-          </div>
+            </div>
+          <% end %>
+        <div class="center">
+         <%= f.submit yield(:button_text), class: "btn btn-primary btn-#{yield(:class_text)}" %>
         </div>
-      </div>
-    </div>
+    <% end %>
   </div>
 </div>

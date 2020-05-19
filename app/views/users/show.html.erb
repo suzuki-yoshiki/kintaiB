@@ -1,4 +1,6 @@
 <% provide(:title, @user.name) %>
+<% provide(:class_text, 'basic-info') %>
+<% provide(:button_text, '申請') %>
 <div>
   <table class="table table-bordered table-condensed user-table">
     <tr>
@@ -30,17 +32,17 @@
 
  <% if current_user.superior? %>
   <div class="btn-users-show">
-   <p><%= link_to "【所属長承認申請のお知らせ】", apploval_one_month_info_user_attendance_path(@user), remote: true, class: "btn btn-link" %> <a class = "box1">件通知がありました</a></p></div>
+   <p><%= link_to "【所属長承認申請のお知らせ】", apploval_one_month_info_user_attendance_path(@user), remote: true, class: "btn btn-link" %> <span class = "box1">件通知がありました</span></p></div>
    <div class="btn-users-show">
-   <p><%= link_to "【勤怠変更申請のお知らせ】", change_request_info_user_attendance_path(@user), remote: true, class: "btn btn-link" %>通知</p></div>
+   <p><%= link_to "【勤怠変更申請のお知らせ】", change_request_info_user_attendance_path(@user), remote: true, class: "btn btn-link" %> <span class = "box1">通知がありました</span></p></div>
    <div class="btn-users-show">
-   <p><%= link_to "【残業申請のお知らせ】", new_overtime_info_user_attendance_path(@user), remote: true, class: "btn btn-link" %> <a class = "box1">件通知がありました</a></p></div>
+   <p><%= link_to "【残業申請のお知らせ】", new_overtime_info_user_attendance_path(@user), remote: true, class: "btn btn-link" %> <span class = "box1"><%= @change_sum %>件通知がありました</span></p></div>
  <% end %>
  
 <div class="btn-users-show">
-  <%= link_to "1ヶ月の勤怠編集へ", attendances_edit_one_month_user_path(date: @first_day), class: "btn btn-success" %>
+  <%= link_to "1ヶ月の勤怠編集へ", edit_one_month_user_attendance_path(@user, date: @first_day), class: "btn btn-success" %>
   <%= link_to "CSV出力", attendances_show_work_time_user_path(format: :csv), class: "btn btn-primary" %>
-  <br><%= link_to "勤怠修正ログ（承認済）", attendances_edit_log_user_path, class: "btn btn-primary" %>
+  <br><%= link_to "勤怠修正ログ（承認済）", edit_log_user_attendance_path(@user), class: "btn btn-primary" %>
 </div>
 
 <div>
@@ -76,7 +78,7 @@
     </thead>
 
     <tbody>
-      <% @attendances.each do |day| %>
+       <% @attendances.each do |day| %>
         <tr>
           <td><%= link_to "残業申請", edit_overtime_info_user_attendance_path(@user, date: day.worked_on), remote: true, class: "btn btn-primary" %></td>
           <td><%= l(day.worked_on, format: :short) %></td>
@@ -114,14 +116,14 @@
               <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
               <% end %>
           </td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td><%= day.note %></td>
+          <td><%= l(day.finished_plan_at, format: :hour) if day.finished_plan_at.present? %></td>
+          <td><%= format_min(day.finished_plan_at) if day.finished_plan_at.present? %></td>
           <td colspan = "2"></td>
-          <td colspan = "2"></td>
-          <td></td>
+          <td colspan = "2"><%= day.business_process_content %></td>
+          <td><%= day.mark_instructor_confirmation %></td>
         </tr>
-      <% end %>
+       <% end %>
     </tbody>
  
   
@@ -135,12 +137,27 @@
         <td></td>
         <td colspan = "6" rowspan = "2"></td>
         <td rowspan = "2">
-          
+          <%= form_with(model: @user, url: apploval_request_user_attendance_path(@attendance), local: true) do |f| %>
+            <% @attendances.each do |date| %>
+            <%= f.fields_for "attendances[]", date do |i| %>
+            <% if date.mark_apploval_confirmation.present? %>
+            <span>所属長承認 【<%= date.mark_finish %>】</span>
+            <% else %>
+            <span>所属長承認 【未】</span>
+            <% end %>
+            <br><%= i.collection_select(:apploval_confirmation, @superior, :name, :name, {include_blank: true, class: "form-control"}) %>
+                <%= f.hidden_field :mark_apploval_confirmation, :value => "申請中" %>
+                <%= f.hidden_field :apploval_month, :value => @month %>
+            <br><%= i.submit yield(:button_text), class: "btn btn-primary form-control" %>
+            <% end %>
+            <% break %>
+            <% end %>
+          <% end %>
         </td>
       </tr>
       <tr>
         <td></td>
-        <td colspan="2"><%= @attendances.count %></td>
+        <td colspan="2"><%= @attendances.size %></td>
         <td colspan="6"><%= format_basic_info(@user.work_time).to_f * @worked_sum %></td>
         <td colspan="4"><%= format("%.2f", @total_working_times.to_f) %></td>
         <td></td>

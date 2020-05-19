@@ -12,41 +12,57 @@
     <div class="modal-body">
       <div class="row">
         <div class="col-md-6 col-md-offset-3">
-          <%= form_with(model: @attendance, url: request_overtime_user_attendance_path(@user, @attendance), local: true, method: :patch) do |f| %>
-          <table class="table table-bordered table-condensed user-table">
-           <thead> 
-            <tr>
-              <td>日付</td>
-              <td>曜日</td>
-              <td>終了予定時間</td>
-              <td>翌日</td>
-              <td>業務処理内容</td>
-              <td>指示者確認</td>
-            </tr>
-           </thead>
-           <tbody>
-            <tr>
-              <td><%= l(@attendance.worked_on, format: :short) %></td>
-              <td><%= $days_of_the_week[@attendance.worked_on.wday] %></td>
-              <td><%= f.time_field :finished_plan_at, class: "form-control" %></td>
-              <td><%= f.check_box :tomorrow, id: "remember-me" %></td>
-              <td><%= f.text_field :business_process_content, class: "form-control" %></td>
-              <td><%= f.select :instructor_confirmation, Attendance.instructor_confirmations.keys.to_a, { include_blank: true } %></td>
-              <td><%= f.hidden_field :mark_instructor_confirmation, value: "申請中" %></td>
-            </tr>
-           </tbody>
-          </table>
+          <%= form_with(model: @attendance, url: request_overtime_user_attendance_path(@attendance), local: true, method: :patch) do |f| %>
+            <%= f.hidden_field :id, :value => @attendance.id %> <!-- attendancesテーブルのidを渡す -->
+            <%= f.hidden_field :user_id, :value => @user.id %> <!--usersテーブルのid（つまりログインしているユーザーのid)をvalueに指定している-->
+            <%= f.hidden_field :mark_instructor_confirmation, :value => "申請中" %>
+            <table class="table table-bordered table-condensed user-table">
+               <thead> 
+                <tr>
+                  <td>日付</td>
+                  <td>曜日</td>
+                  <td>終了予定時間</td>
+                  <td>翌日</td>
+                  <td>業務処理内容</td>
+                  <td>指示者確認</td>
+                </tr>
+               </thead>
+               <tbody>
+                <tr>
+                  <td><%= l(@attendance.worked_on, format: :short) %></td>
+                  <td>
+                    <% if @attendance.worked_on.wday == 6 %>
+                      <font color="blue">土</font>
+                    <% elsif @attendance.worked_on.wday == 0 %>
+                      <font color="red">日</font>
+                    <% elsif @attendance.worked_on.wday == 1 %>
+                      <font color="black">月</font>
+                    <% elsif @attendance.worked_on.wday == 2 %>
+                      <font color="black">火</font>
+                    <% elsif @attendance.worked_on.wday == 3 %>
+                      <font color="black">水</font>
+                    <% elsif @attendance.worked_on.wday == 4 %>
+                      <font color="black">木</font>
+                    <% elsif @attendance.worked_on.wday == 5 %>
+                      <font color="black">金</font>
+                    <% end %>            
+                  </td>
+                  <td><%= f.time_field :finished_plan_at, class: "form-control" %></td>
+                  <td><%= f.check_box :tomorrow, id: "remember-me" %></td>
+                  <td><%= f.text_field :business_process_content, class: "form-control" %></td>
+                  <td><%= f.collection_select(:instructor_confirmation, @superior, :name, :name) %></td>
+                </tr>
+               </tbody>
+            </table>
             <div class="center">
               <%= f.submit yield(:button_text), class: "btn btn-primary btn-#{yield(:class_text)}" %>
-              <button type="button" class="btn btn-default btn-<%= yield(:class_text) %>" data-dismiss="modal">
-                キャンセル
-              </button>
-             </div>
-           </div>
-         </div>
+            </div>
+          <% end %>
         </div>
-       </div>
       </div>
-    <% end %>
+    </div>
   </div>
 </div>
+     
+  
+      

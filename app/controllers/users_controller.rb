@@ -39,12 +39,18 @@ class UsersController < ApplicationController
         end
     end   
     
-    
     def show
       @attendance = Attendance.find(params[:id])
-      @worked_sum = @attendances.where.not(started_at: nil).count
-      @all_attendance = Attendance.all
-      @over_time =  @all_attendance.where.not(finished_plan_at: nil).where(mark_instructor_confirmation: "申請中").count
+      @worked_sum = @attendances.where.not(started_at: nil).size
+      @superior = User.where(superior: true).where.not(id: current_user)
+      all_attendance = Attendance.all
+      #残業申請の件数
+      @over_bsum =  all_attendance.where(mark_instructor_confirmation: "2").where(instructor_confirmation: "上長B").size
+      #勤怠変更申請の件数
+      @change_sum = all_attendance.size
+      #１ヶ月分勤怠申請の件数
+      @apploval_bsum = all_attendance.where(mark_apploval_confirmation: "申請中").where(apploval_confirmation: "上長B").size
+      @month = Date.current.month
     end
     
     def new
