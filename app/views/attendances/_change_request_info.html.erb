@@ -9,7 +9,7 @@
       </button>
     </div>
    <%= form_with(model: @user, url: change_request_user_attendance_path, local: true, method: :patch) do |f| %>
-    <% @user.each do |user| %>   
+    <% @users.each do |user| %>   
      <h1 class="modal-title">【<%= user.name %>からの勤怠変更申請】</h1>
       <div class="modal-body">
        <div class="row">
@@ -44,8 +44,9 @@
               </tr>
              </thead>
              <tbody>
-              <% @attendance.each do |day| %>
+              <% @attendances.each do |day| %>
                <%= f.fields_for "attendances[]", day do |i| %>
+               <% if day.user_id == user.id && day.mark_change_confirmation == "申請中" && current_user.name == day.change_confirmation %>
                 <tr>
                   <td><%= l(day.worked_on, format: :short) %></td>
                   <td>
@@ -74,21 +75,22 @@
                   <td><%= l(day.finished_at, format: :hour) if day.finished_at.present? %></td>
                   <td><%= format_min(day.finished_at) if day.finished_at.present? %></td>
                   <td><%= day.note %></td>
-                  <td><%= f.select :mark_change_confirmation, Attendance.mark_change_confirmations.keys.to_a, { include_blank: true } %></td>
-                  <td><%= f.check_box :change, id: "remember-me" %></td>
+                  <td><%= i.select :mark_change_confirmation, Attendance.mark_change_confirmations.keys, { include_blank: true } %></td>
+                  <td><%= i.check_box :change, id: "remember-me" %></td>
                   <td><%= link_to "確認", "#", class: "btn btn-primary" %></td>
                 </tr>
-              <% end %>
-              <% end %>
             </tbody>
+            <% end %>
+            <% end %>
+            <% end %>
           </table>
             </div>
-             <% end %>
-          <div class="center">
-            <%= f.submit yield(:button_text), class: "btn btn-primary btn-#{yield(:class_text)}" %>
-          </div>
-        <% end %>
+            </div>
+           </div>
+          <% end %>
+      <div class="center">
+        <%= f.submit yield(:button_text), class: "btn btn-primary btn-#{yield(:class_text)}" %>
       </div>
-    </div>
+    <% end %>
   </div>
 </div>

@@ -18,6 +18,7 @@
       <tbody>
         <% @attendances.each do |day| %>
           <%= f.fields_for "attendances[]", day do |attendance| %>
+          <%= attendance.hidden_field :mark_change_confirmation, :value => "申請中" %>
             <tr>
               <td><%= l(day.worked_on, format: :short) %></td>
               <td>
@@ -38,28 +39,26 @@
                   <% end %>            
               </td>
               <% if (Date.current < day.worked_on) %>
-              <td><%= attendance.time_field :started_at, readonly: true,class: "form-control" %></td>
+              <td><%= attendance.time_field :started_at, readonly: true, class: "form-control" %></td>
               <td><%= attendance.time_field :finished_at, readonly: true, class: "form-control" %></td>
               <% else %>
-              <td><%= attendance.time_field :started_at,  class: "form-control" %></td>
+              <td><%= attendance.time_field :started_at, class: "form-control" %></td>
               <td><%= attendance.time_field :finished_at, class: "form-control" %></td>
               <% end %>
-              <td><%= f.check_box :tomorrow, id: "remember-me" %></td>
+              <td><%= attendance.check_box :tomorrow, id: "remember-me" %></td>
               <td>
                   <% if day.started_at.present? && day.finished_at.present? %>
-                   <%= working_times(day.started_at, day.finished_at) %>
+                   <%= working_times(day.started_before_at, day.finished_before_at) %>
                   <% end %>
               </td>
               <td><%= attendance.text_field :note, class: "form-control" %></td>
-              <td><%= f.collection_select(:change_confirmation, @superior, :name, :name, {include_blank: true}) %></td>
-                  <%= f.hidden_field :mark_change_confirmation, :value => "申請中" %>
+              <td><%= attendance.collection_select(:change_confirmation, @superior, :name, :name, {include_blank: true}) %></td>
             </tr>
           <% end %>
         <% end %>
       </tbody>
     </table>
   </div>
-  
   <div class="center">
     <%= link_to "キャンセル", user_path(date: @first_day), class: "btn btn-lg btn-default" %>
     <%= f.submit "編集を申請する", class: "btn btn-lg btn-primary" %>

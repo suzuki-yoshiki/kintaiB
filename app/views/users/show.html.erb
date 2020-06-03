@@ -30,18 +30,31 @@
   </table>
 </div>
 
+<span class="btn-users-show">
  <% if current_user.superior? %>
-  <div class="btn-users-show">
-   <p><%= link_to "【所属長承認申請のお知らせ】", apploval_one_month_info_user_attendance_path(@user), remote: true, class: "btn btn-link" %> <span class = "box1">件通知がありました</span></p></div>
-   <div class="btn-users-show">
-   <p><%= link_to "【勤怠変更申請のお知らせ】", change_request_info_user_attendance_path(@user), remote: true, class: "btn btn-link" %> <span class = "box1">通知がありました</span></p></div>
-   <div class="btn-users-show">
-   <p><%= link_to "【残業申請のお知らせ】", new_overtime_info_user_attendance_path(@user), remote: true, class: "btn btn-link" %> <span class = "box1"><%= @change_sum %>件通知がありました</span></p></div>
- <% end %>
+     <% if @apploval_sum == 0 %>
+      <span>【所属長承認申請のお知らせ】</span>
+     <% else %>
+      <font color = "red">【所属長承認申請のお知らせ】<span class = "box1"><%= link_to "#{@apploval_sum}件通知ありました", apploval_one_month_info_user_attendance_path(@user), remote: true, class: "btn btn-link", :style=>"color:red;" %></span></font>
+     <% end %>
+     <br>
+     <% if @change_sum == 0 %>
+      <span>【勤怠変更申請のお知らせ】</span>
+     <% else %>
+      <font color = "red">【勤怠変更申請のお知らせ】<span class = "box1"><%= link_to "#{@change_sum}件通知があります", change_request_info_user_attendance_path(@user), remote: true, class: "btn btn-link", :style=>"color:red;" %></span></font>
+     <% end %>
+     <br>
+     <% if @over_sum == 0 %>
+      <span>【残業申請のお知らせ】</span>
+     <% else %>
+      <font color = "red">【残業申請のお知らせ】<span class = "box1"><%= link_to "#{@over_sum}件通知があります", new_overtime_info_user_attendance_path(@user), remote: true, class: "btn btn-link", :style=>"color:red;" %></span></font>
+     <% end %>
+  <% end %>
+</span>
  
 <div class="btn-users-show">
   <%= link_to "1ヶ月の勤怠編集へ", edit_one_month_user_attendance_path(@user, date: @first_day), class: "btn btn-success" %>
-  <%= link_to "CSV出力", attendances_show_work_time_user_path(format: :csv), class: "btn btn-primary" %>
+  <%= link_to "CSV出力", attendances_show_work_time_user_path(@user, format: :csv), class: "btn btn-primary" %>
   <br><%= link_to "勤怠修正ログ（承認済）", edit_log_user_attendance_path(@user), class: "btn btn-primary" %>
 </div>
 
@@ -99,29 +112,67 @@
               <font color="black">金</font>
             <% end %>            
           </td>
-          <td><%= l(day.started_at, format: :hour) if day.started_at.present? %></td>
-          <td><%= format_min(day.started_at) if day.started_at.present? %></td>
-          
+          <td>
+            <% if day.started_before_at.present? && day.started_at.blank? %>
+             <%= l(day.started_before_at, format: :hour) %>
+            <% elsif day.started_before_at.present? && day.started_at.present? %>
+             <%= l(day.started_at, format: :hour) %>
+            <% end %>
+          </td>
+          <td>
+            <% if day.started_before_at.present? && day.started_at.blank? %>
+             <%= format_min(day.started_before_at)  %>
+            <% elsif day.started_before_at.present? && day.started_at.present? %>
+             <%= format_min(day.started_at) %>
+            <% end %>
+          </td>
           <td>
               <% if btn_text = attendance_state(day) %>
               <%= link_to "#{btn_text}", user_attendance_path(@user, day), method: :patch, class: "btn btn-default btn-attendance" %>
               <% end %>
           </td>
-          <td><%= l(day.finished_at, format: :hour) if day.finished_at.present? %></td>
-          <td><%= format_min(day.finished_at) if day.finished_at.present? %></td>
+          <td>
+            <% if day.finished_before_at.present? && day.finished_at.blank? %>
+             <%= l(day.finished_before_at, format: :hour) %>
+            <% elsif day.finished_before_at.present? && day.finished_at.present? %>
+             <%= l(day.finished_at, format: :hour) %>
+            <% end %>
+          </td>
+          <td>
+            <% if day.finished_before_at.present? && day.finished_at.blank? %>
+             <%= format_min(day.finished_before_at) %>
+            <% elsif day.finished_before_at.present? && day.finished_at.present? %>
+             <%= format_min(day.finished_at) %>
+            <% end %>
+          </td>
           <td></td>
           <td colspan = "4">
-              <% if day.started_at.present? && day.finished_at.present? %>
-              <%= str_times = working_times(day.started_at, day.finished_at) %>
+              <% if day.started_before_at.present? && day.finished_before_at.present? %>
+              <%= str_times = working_times(day.started_before_at, day.finished_before_at) %>
               <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
               <% end %>
           </td>
           <td><%= day.note %></td>
           <td><%= l(day.finished_plan_at, format: :hour) if day.finished_plan_at.present? %></td>
           <td><%= format_min(day.finished_plan_at) if day.finished_plan_at.present? %></td>
-          <td colspan = "2"></td>
+          <td colspan = "2">
+             <% if @user.designated_work_end_time.present? && day.finished_plan_at.present? %>
+             <%= over_times(@user.designated_work_end_time, day.finished_plan_at) %>
+             <% end %>
+          </td>
           <td colspan = "2"><%= day.business_process_content %></td>
-          <td><%= day.mark_instructor_confirmation %></td>
+          <td>
+             <% if day.mark_instructor_confirmation.present? && day.finished_plan_at.present? %>
+              <%= day.instructor_confirmation %> 残業<%= day.mark_instructor_confirmation %>
+             <% else %>
+             
+             <% end %>
+             <% if day.mark_change_confirmation.present? && day.finished_at.present? %>
+              <%= day.change_confirmation %> 勤怠変更<%= day.mark_change_confirmation %>
+             <% else %>
+               
+             <% end %>
+          </td>
         </tr>
        <% end %>
     </tbody>
@@ -137,18 +188,22 @@
         <td></td>
         <td colspan = "6" rowspan = "2"></td>
         <td rowspan = "2">
-          <%= form_with(model: @user, url: apploval_request_user_attendance_path(@attendance), local: true) do |f| %>
+          <%= form_with(model: @user, url: apploval_one_month_user_attendance_path(@attendance), local: true, method: :patch) do |f| %>
             <% @attendances.each do |date| %>
             <%= f.fields_for "attendances[]", date do |i| %>
             <% if date.mark_apploval_confirmation.present? %>
-            <span>所属長承認 【<%= date.mark_finish %>】</span>
+            <span>所属長承認  <%= date.apploval_confirmation %>【<%= date.mark_apploval_confirmation %>】</span>
+            <br><%= i.collection_select(:apploval_confirmation, @superior, :name, :name, {include_blank: true, class: "form-control"}) %>
+                <%= i.hidden_field :mark_apploval_confirmation, :value => "申請中" %>
+                <%= i.hidden_field :apploval_month, :value => @month %>
+            <br><%= f.submit yield(:button_text), disabled: true, class: "btn btn-primary form-control" %>
             <% else %>
             <span>所属長承認 【未】</span>
-            <% end %>
             <br><%= i.collection_select(:apploval_confirmation, @superior, :name, :name, {include_blank: true, class: "form-control"}) %>
-                <%= f.hidden_field :mark_apploval_confirmation, :value => "申請中" %>
-                <%= f.hidden_field :apploval_month, :value => @month %>
-            <br><%= i.submit yield(:button_text), class: "btn btn-primary form-control" %>
+                <%= i.hidden_field :mark_apploval_confirmation, :value => "申請中" %>
+                <%= i.hidden_field :apploval_month, :value => @month %>
+            <br><%= f.submit yield(:button_text), class: "btn btn-primary form-control" %>
+            <% end %>
             <% end %>
             <% break %>
             <% end %>

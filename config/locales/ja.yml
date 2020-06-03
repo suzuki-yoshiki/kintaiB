@@ -40,6 +40,7 @@ ja:
     formats:
       default: "%Y/%m/%d"
       long: "%Y年%m月%d日(%a)"
+      long_line: "%Y-%m-%d-(%a)"
       middle: "%Y年%m月"
       short: "%-m/%-d"
       month: "%-m"
@@ -203,6 +204,7 @@ ja:
     am: 午前
     formats:
       default: "%Y年%m月%d日(%a) %H時%M分%S秒 %z"
+      middle: "%Y-%m-%d(%a)"
       long: "%Y/%m/%d %H:%M"
       short: "%m/%d %H:%M"
       time: "%H：%M"

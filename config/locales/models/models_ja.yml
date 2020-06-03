@@ -22,8 +22,10 @@ ja:
           updated_at: 更新日
         attendance:
           worked_on: 日付
-          started_at: 出勤時間
-          finished_at: 退勤時間
+          started_at: 変更前出勤時間
+          finished_at: 変更前退勤時間
+          started_at: 変更後出勤時間
+          finished_at: 変更後退勤時間
           finished_plan_at: 終了予定時間
           note: 備考
           user: ユーザーID

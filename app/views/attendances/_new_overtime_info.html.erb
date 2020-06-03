@@ -9,7 +9,7 @@
       </button>
     </div>
    <%= form_with(model: @user, url: new_overtime_user_attendance_path, local: true, method: :patch) do |f| %>
-    <% @user.each do |user| %>
+    <% @users.each do |user| %>
     <h1 class="modal-title">【<%= user.name %>からの残業申請】</h1>
      <div class="modal-body">
       <div class="row">
@@ -28,42 +28,44 @@
               <td>勤怠を確認</td>
             </tr>
            </thead>
+           <% @attendances.each do |a| %>
+            <%= f.fields_for "attendances[]", a do |i| %>
+             <% if a.user_id == user.id && a.mark_instructor_confirmation == "申請中" && current_user.name == a.instructor_confirmation %>
            <tbody>
-          <% @attendance.each do |finished_plan| %>
-            <%= f.fields_for "attendances[]", finished_plan do |i| %>
             <tr>
-              <td><%= l(finished_plan.worked_on, format: :short) %></td>
+              <td><%= l(a.worked_on, format: :short) %></td>
               <td>
-                <% if finished_plan.worked_on.wday == 6 %>
+                <% if a.worked_on.wday == 6 %>
                   <font color="blue">土</font>
-                <% elsif finished_plan.worked_on.wday == 0 %>
+                <% elsif a.worked_on.wday == 0 %>
                   <font color="red">日</font>
-                <% elsif finished_plan.worked_on.wday == 1 %>
+                <% elsif a.worked_on.wday == 1 %>
                   <font color="black">月</font>
-                <% elsif finished_plan.worked_on.wday == 2 %>
+                <% elsif a.worked_on.wday == 2 %>
                   <font color="black">火</font>
-                <% elsif finished_plan.worked_on.wday == 3 %>
+                <% elsif a.worked_on.wday == 3 %>
                   <font color="black">水</font>
-                <% elsif finished_plan.worked_on.wday == 4 %>
+                <% elsif a.worked_on.wday == 4 %>
                   <font color="black">木</font>
-                <% elsif finished_plan.worked_on.wday == 5 %>
+                <% elsif a.worked_on.wday == 5 %>
                   <font color="black">金</font>
                 <% end %>            
               </td>
-              <td><%= l(finished_plan.finished_plan_at, format: :time) %></td>
+              <td><%= l(a.finished_plan_at, format: :time) %></td>
               <td><%= l(user.designated_work_end_time, format: :time) %></td>
-              <td><%= working_times(user.designated_work_end_time.floor_to(15.minutes), finished_plan.finished_plan_at.floor_to(15.minutes)) %></td>
-              <td><%= finished_plan.business_process_content %></td>
-              <td><%= f.select :mark_instructor_confirmation, Attendance.mark_instructor_confirmations.keys.to_a, { include_blank: true } %></td>
-              <td><%= f.check_box :change, id: "remember-me" %></td>
+              <td><%= working_times(user.designated_work_end_time.floor_to(15.minutes), a.finished_plan_at.floor_to(15.minutes)) %></td>
+              <td><%= a.business_process_content %></td>
+              <td><%= i.select :mark_instructor_confirmation, Attendance.mark_instructor_confirmations.keys, { include_blank: true } %></td>
+              <td><%= i.check_box :change, id: "remember-me" %></td>
               <td><%= link_to "確認", user_path, class: "btn btn-primary" %></td>
             </tr>
+            </tbody>
             <% end %>
-          <% end %>
-           </tbody>
-          </table>
-          </div>
             <% end %>
+            <% end %>
+            </table>
+            </div>
+           <% end %>
           <div class="center">
             <%= f.submit yield(:button_text), class: "btn btn-primary btn-#{yield(:class_text)}" %>
           </div>

@@ -8,8 +8,8 @@
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
-    <%= form_with(model: @user, url: apploval_one_month_user_attendance_path, local: true, method: :patch) do |f| %>
-     <% @user.each do |user| %>
+    <%= form_with(model: @user, url: apploval_request_user_attendance_path, local: true, method: :patch) do |f| %>
+     <% @users.each do |user| %>
            <h1 class="modal-title">【<%= user.name %>からの１ヶ月分勤怠申請】</h1>
             <div class="modal-body">
               <div class="row">
@@ -24,12 +24,12 @@
                           </tr>
                          </thead>
                          <tbody>
-                         <% @attendance.each do |date| %>
+                         <% @attendances.each do |date| %>
                           <%= f.fields_for "attendances[]", date do |i| %>
                               <tr>
                                 <td><%= l(date.worked_on, format: :month) if date.apploval_month.present? %>月</td>
-                                <td><%= f.select :mark_apploval_confirmation, Attendance.mark_apploval_confirmations.keys.to_a, { include_blank: true } %></td>
-                                <td><%= f.check_box :change, id: "remember-me" %></td>
+                                <td><%= i.select :mark_apploval_confirmation, Attendance.mark_apploval_confirmations.keys.to_a, { include_blank: true } %></td>
+                                <td><%= i.check_box :change, id: "remember-me" %></td>
                                 <td><%= link_to "確認", "#", class: "btn btn-primary" %></td>
                               </tr>
                         </tbody>

@@ -41,16 +41,17 @@ class UsersController < ApplicationController
     
     def show
       @attendance = Attendance.find(params[:id])
-      @worked_sum = @attendances.where.not(started_at: nil).size
+      @worked_sum = @attendances.where.not(started_before_at: nil).size
       @superior = User.where(superior: true).where.not(id: current_user)
       all_attendance = Attendance.all
       #残業申請の件数
-      @over_bsum =  all_attendance.where(mark_instructor_confirmation: "2").where(instructor_confirmation: "上長B").size
+      @over_sum =  all_attendance.where(mark_instructor_confirmation: "申請中").where(attendances: {instructor_confirmation: @user.name}).size
       #勤怠変更申請の件数
-      @change_sum = all_attendance.size
+      @change_sum = all_attendance.where(mark_change_confirmation: "申請中").where(attendances: {change_confirmation: @user.name}).size
       #１ヶ月分勤怠申請の件数
-      @apploval_bsum = all_attendance.where(mark_apploval_confirmation: "申請中").where(apploval_confirmation: "上長B").size
-      @month = Date.current.month
+      @apploval_sum = all_attendance.where(mark_apploval_confirmation: "申請中").where(attendances: {apploval_confirmation: @user.name}).size
+      @month = Date.current.beginning_of_month
+      #@months = current_user.attendances.find_by(date: @first_day)
     end
     
     def new
@@ -103,7 +104,7 @@ class UsersController < ApplicationController
   private
 
     def user_params
-      params.require(:user).permit(:name, :email, :affiliation, :employee_number, :uid, :password, :password_confirmation)
+      params.require(:user).permit(:name, :email, :affiliation, :password, :password_confirmation)
     end
     
     def user_info_params

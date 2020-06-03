@@ -21,16 +21,16 @@ Rails.application.routes.draw do
     member do
       get 'edit_one_month'
       patch 'update_one_month'
-      get 'edit_log' #勤怠ログ      
+      get 'edit_log' #勤怠ログ   
       get 'edit_overtime_info'  #残業申請
-      patch 'request_overtime'
-      patch 'apploval_request'
-      get 'apploval_one_month_info' #所属長承認申請のお知らせ
-      patch 'apploval_one_month'
+      patch 'request_overtime'  
+      patch 'apploval_request'   #所属長承認申請のお知らせ
+      get 'apploval_one_month_info'  #１ヶ月分勤怠申請のモーダル
+      patch 'apploval_one_month'     #１ヶ月分勤怠申請の返信
       get 'change_request_info'   #勤怠変更申請のお知らせ
-      patch 'change_request'
+      patch 'change_request'     #勤怠変更申請の返信
       get 'new_overtime_info' #残業申請のお知らせ
-      patch 'new_overtime'
+      patch 'new_overtime'    #残業申請の返信
     end
     end
   end
