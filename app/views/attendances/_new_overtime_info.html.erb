@@ -53,11 +53,13 @@
               </td>
               <td><%= l(a.finished_plan_at, format: :time) %></td>
               <td><%= l(user.designated_work_end_time, format: :time) %></td>
-              <td><%= working_times(user.designated_work_end_time.floor_to(15.minutes), a.finished_plan_at.floor_to(15.minutes)) %></td>
+              <td>
+                  <%= over_times(a.started_at, a.finished_plan_at, @user.basic_work_time) %>
+              </td>
               <td><%= a.business_process_content %></td>
               <td><%= i.select :mark_instructor_confirmation, Attendance.mark_instructor_confirmations.keys, { include_blank: true } %></td>
-              <td><%= i.check_box :change, id: "remember-me" %></td>
-              <td><%= link_to "確認", user_path, class: "btn btn-primary" %></td>
+              <td><%= i.check_box :change %></td>
+              <td><%= link_to "確認", users_confirmation_check_user_attendance_path(@user, id: a.user_id, date: a.worked_on), class: "btn btn-primary" %></td>
             </tr>
             </tbody>
             <% end %>

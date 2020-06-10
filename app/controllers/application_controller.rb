@@ -1,13 +1,16 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
   include SessionsHelper
-
+  before_action :set_current_user
+  
   #Rubyのリテラル表記と呼ばれるもの
   $days_of_the_week = %w{日 月 火 水 木 金 土}
   
   # beforeフィルター
     
-    
+    def set_current_user
+      @current_user = User.find(session[:user_id]) if session[:user_id]
+    end
     #   paramsハッシュからユーザーを取得します。
     def set_user
       @user = User.find(params[:id])

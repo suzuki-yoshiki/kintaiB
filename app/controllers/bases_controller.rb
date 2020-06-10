@@ -1,7 +1,8 @@
 class BasesController < ApplicationController
-   before_action :admin_user, only: [:destroy, :edit_base_info, :update_base_info]
+   before_action :admin_user, only: :index
     
     def index
+      redirect_to user_url unless current_user.admin?
       @bases = Base.all
     end
     

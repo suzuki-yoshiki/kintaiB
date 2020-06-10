@@ -11,10 +11,10 @@
           <%= link_to "→", user_path(date: @first_day.next_month), class: "btn btn-primary" %>
         </div>
       </td>
-      <td>指定勤務開始時間 : <%= l(@user.designated_work_start_time, format: :time) %>
-      <br>指定勤務終了時間 : <%= l(@user.designated_work_end_time, format: :time) %>
+      <td>指定勤務開始時間  <%= l(@user.designated_work_start_time, format: :time) %>
+      <br>指定勤務終了時間  <%= l(@user.designated_work_end_time, format: :time) %>
       </td>
-      <td colspan = "3">基本時間 : <%= format_basic_info(@user.basic_time) %></td>
+      <td colspan = "3">基本時間  <%= format_basic_info(@user.basic_work_time) %></td>
       <td>初日 : <%= l(@first_day, format: :short) %></td>
     </tr>
 
@@ -53,8 +53,8 @@
 </span>
  
 <div class="btn-users-show">
-  <%= link_to "1ヶ月の勤怠編集へ", edit_one_month_user_attendance_path(@user, date: @first_day), class: "btn btn-success" %>
-  <%= link_to "CSV出力", attendances_show_work_time_user_path(@user, format: :csv), class: "btn btn-primary" %>
+  <%= link_to "1ヶ月の勤怠編集へ", edit_one_month_user_attendance_path(@user, date: @first_day), class: "btn btn-primary" %>
+  <%= link_to "CSV出力", user_path(@user, format: :csv), class: "btn btn-primary" %>
   <br><%= link_to "勤怠修正ログ（承認済）", edit_log_user_attendance_path(@user), class: "btn btn-primary" %>
 </div>
 
@@ -115,14 +115,14 @@
           <td>
             <% if day.started_before_at.present? && day.started_at.blank? %>
              <%= l(day.started_before_at, format: :hour) %>
-            <% elsif day.started_before_at.present? && day.started_at.present? %>
+            <% elsif day.started_at.present? && day.mark_change_confirmation == "承認" %>
              <%= l(day.started_at, format: :hour) %>
             <% end %>
           </td>
           <td>
             <% if day.started_before_at.present? && day.started_at.blank? %>
              <%= format_min(day.started_before_at)  %>
-            <% elsif day.started_before_at.present? && day.started_at.present? %>
+            <% elsif day.started_at.present? && day.mark_change_confirmation == "承認" %>
              <%= format_min(day.started_at) %>
             <% end %>
           </td>
@@ -134,33 +134,71 @@
           <td>
             <% if day.finished_before_at.present? && day.finished_at.blank? %>
              <%= l(day.finished_before_at, format: :hour) %>
-            <% elsif day.finished_before_at.present? && day.finished_at.present? %>
+            <% elsif day.finished_at.present? && day.mark_change_confirmation == "承認" %>
              <%= l(day.finished_at, format: :hour) %>
             <% end %>
           </td>
           <td>
             <% if day.finished_before_at.present? && day.finished_at.blank? %>
              <%= format_min(day.finished_before_at) %>
-            <% elsif day.finished_before_at.present? && day.finished_at.present? %>
+            <% elsif day.finished_at.present? && day.mark_change_confirmation == "承認" %>
              <%= format_min(day.finished_at) %>
             <% end %>
           </td>
           <td></td>
           <td colspan = "4">
+             <% if day.tomorrow_at == false %>
               <% if day.started_before_at.present? && day.finished_before_at.present? %>
               <%= str_times = working_times(day.started_before_at, day.finished_before_at) %>
               <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
+              <% elsif day.started_at.present? && day.finished_at.present? && day.mark_change_confirmation == "承認"%>
+              <%= working_times(day.started_at, day.finished_at) %>
               <% end %>
-          </td>
-          <td><%= day.note %></td>
-          <td><%= l(day.finished_plan_at, format: :hour) if day.finished_plan_at.present? %></td>
-          <td><%= format_min(day.finished_plan_at) if day.finished_plan_at.present? %></td>
-          <td colspan = "2">
-             <% if @user.designated_work_end_time.present? && day.finished_plan_at.present? %>
-             <%= over_times(@user.designated_work_end_time, day.finished_plan_at) %>
+             <% elsif day.tomorrow_at == true %>
+              <% if day.started_before_at.present? && day.finished_before_at.present? %>
+              <%= str_times = working_times(day.started_before_at, day.finished_before_at) %>
+              <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
+              <% elsif day.started_at.present? && day.finished_at.present? && day.mark_change_confirmation == "承認"%>
+              <%= working_tommorow_times(day.started_at, day.finished_at) %>
+              <% end %>
+            <% else %>
+             <% if day.started_before_at.present? && day.finished_before_at.present? %>
+              <%= str_times = working_times(day.started_before_at, day.finished_before_at) %>
+              <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
+              <% elsif day.started_at.present? && day.finished_at.present? && day.mark_change_confirmation == "承認"%>
+              <%= working_times(day.started_at, day.finished_at) %>
+              <% end %>
              <% end %>
           </td>
-          <td colspan = "2"><%= day.business_process_content %></td>
+          <td>
+            <% if day.note.present? && day.mark_change_confirmation == "承認" %>
+            <%= day.note %>
+            <% end %>
+          </td>
+          <td>
+            <% if day.finished_plan_at.present? && day.mark_instructor_confirmation == "承認" %>
+            <%= l(day.finished_plan_at, format: :hour) %>
+            <% end %>
+          </td>
+          <td>
+            <% if day.finished_plan_at.present? && day.mark_instructor_confirmation == "承認" %>
+            <%= format_min(day.finished_plan_at) if day.finished_plan_at.present? %>
+            <% end %>
+          </td>
+          <td colspan = "2">
+             <% if day.finished_plan_at.present? && day.mark_instructor_confirmation == "承認" && day.tomorrow == false %>
+              <% if over_times(day.started_at, day.finished_plan_at, @user.basic_work_time) %>
+              <%= over_times(day.started_at, day.finished_plan_at, @user.basic_work_time) %>
+              <% end %>
+             <% elsif day.finished_plan_at.present? && day.mark_instructor_confirmation == "承認" && day.tomorrow == true %>
+              <%= over_times(day.started_at, day.finished_plan_at, @user.basic_work_time) %>
+             <% end %>
+          </td>
+          <td colspan = "2">
+            <% if day.business_process_content.present? && day.mark_instructor_confirmation == "承認" %>
+            <%= day.business_process_content %>
+            <% end %>
+          </td>
           <td>
              <% if day.mark_instructor_confirmation.present? && day.finished_plan_at.present? %>
               <%= day.instructor_confirmation %> 残業<%= day.mark_instructor_confirmation %>
@@ -188,25 +226,27 @@
         <td></td>
         <td colspan = "6" rowspan = "2"></td>
         <td rowspan = "2">
-          <%= form_with(model: @user, url: apploval_one_month_user_attendance_path(@attendance), local: true, method: :patch) do |f| %>
-            <% @attendances.each do |date| %>
-            <%= f.fields_for "attendances[]", date do |i| %>
-            <% if date.mark_apploval_confirmation.present? %>
-            <span>所属長承認  <%= date.apploval_confirmation %>【<%= date.mark_apploval_confirmation %>】</span>
-            <br><%= i.collection_select(:apploval_confirmation, @superior, :name, :name, {include_blank: true, class: "form-control"}) %>
-                <%= i.hidden_field :mark_apploval_confirmation, :value => "申請中" %>
-                <%= i.hidden_field :apploval_month, :value => @month %>
-            <br><%= f.submit yield(:button_text), disabled: true, class: "btn btn-primary form-control" %>
+          <%= form_with(model: @attendance, url: apploval_one_month_user_attendance_path(@user, @attendance), local: true, method: :patch) do |f| %>
+            <!--% @attendances.each do |date| %-->
+            <!--%= f.fields_for "attendances[]", date do |i| %-->
+            <% if @attendance.mark_apploval_confirmation == "申請中" %>
+              <span>所属長承認  <%= @attendance.apploval_confirmation %>【<%= @attendance.mark_apploval_confirmation %>】</span>
+            <% elsif @attendance.mark_apploval_confirmation == "承認" || @attendance.mark_apploval_confirmation == "否認" %>
+              <span>所属長承認 <%= @attendance.apploval_confirmation %>【<%= @attendance.mark_apploval_confirmation %>】</span>
+              <%= form_with(model: @attendance, url: apploval_one_month_user_attendance_path(@user, @attendance), local: true, method: :patch) do |f| %>
+              <br><%= f.collection_select(:apploval_confirmation, @superior, :name, :name, {include_blank: true, class: "form-control"}) %>
+                  <%= f.hidden_field :mark_apploval_confirmation, :value => "申請中" %>
+                  <%= f.hidden_field :apploval_month, :value => @month %>
+              <br><%= f.submit yield(:button_text), class: "btn btn-primary form-control" %>
+              <% end %>
             <% else %>
             <span>所属長承認 【未】</span>
-            <br><%= i.collection_select(:apploval_confirmation, @superior, :name, :name, {include_blank: true, class: "form-control"}) %>
-                <%= i.hidden_field :mark_apploval_confirmation, :value => "申請中" %>
-                <%= i.hidden_field :apploval_month, :value => @month %>
+            <br><%= f.collection_select(:apploval_confirmation, @superior, :name, :name, {include_blank: true, class: "form-control"}) %>
+                <%= f.hidden_field :mark_apploval_confirmation, :value => "申請中" %>
+                <%= f.hidden_field :apploval_month, :value => @month %>
             <br><%= f.submit yield(:button_text), class: "btn btn-primary form-control" %>
             <% end %>
-            <% end %>
-            <% break %>
-            <% end %>
+            <!--% break %-->
           <% end %>
         </td>
       </tr>

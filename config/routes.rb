@@ -15,12 +15,12 @@ Rails.application.routes.draw do
       patch 'update_basic_info'      
       get 'edit2_basic_info'
       get 'attendance_work'
-      get 'attendances/show_work_time'      
     end
   resources :attendances, only: :update do
     member do
       get 'edit_one_month'
       patch 'update_one_month'
+      get 'users/confirmation_check' #勤怠確認
       get 'edit_log' #勤怠ログ   
       get 'edit_overtime_info'  #残業申請
       patch 'request_overtime'  

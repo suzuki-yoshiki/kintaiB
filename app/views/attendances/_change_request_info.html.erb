@@ -76,8 +76,8 @@
                   <td><%= format_min(day.finished_at) if day.finished_at.present? %></td>
                   <td><%= day.note %></td>
                   <td><%= i.select :mark_change_confirmation, Attendance.mark_change_confirmations.keys, { include_blank: true } %></td>
-                  <td><%= i.check_box :change, id: "remember-me" %></td>
-                  <td><%= link_to "確認", "#", class: "btn btn-primary" %></td>
+                  <td><%= i.check_box :change_at %></td>
+                  <td><%= link_to "確認", users_confirmation_check_user_attendance_path(@user, id: day.user_id, date: day.worked_on), class: "btn btn-primary" %></td>
                 </tr>
             </tbody>
             <% end %>

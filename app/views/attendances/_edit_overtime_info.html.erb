@@ -48,7 +48,7 @@
                     <% end %>            
                   </td>
                   <td><%= f.time_field :finished_plan_at, class: "form-control" %></td>
-                  <td><%= f.check_box :tomorrow, id: "remember-me" %></td>
+                  <td><%= f.check_box :tomorrow %></td>
                   <td><%= f.text_field :business_process_content, class: "form-control" %></td>
                   <td><%= f.collection_select(:instructor_confirmation, @superior, :name, :name) %></td>
                 </tr>

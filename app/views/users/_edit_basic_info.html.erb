@@ -39,3 +39,21 @@
     </div>
   </div>
 </div>
+
+
+
+  <%= form_tag import_users_path, multipart: true do  %>
+    <%= button_tag 'ファイル選択', class: "csv-input-btn", type: "button", onclick: "$('#file_input').click();" %>
+    <%= text_field_tag "filename", "", id: "filename", disabled: true %>
+    <%= file_field_tag :file, id: "file_input", style: "display: none;", onchange: "file_selected($(this));" %>
+  <div>
+    <button type="submit" class="btn btn-primary btn-import">CSVをインポート</button>
+  </div>
+  <% end %>
+  
+  <script type="text/javascript">
+  function file_selected(file_field){
+    var filename = $(file_field)[0].files[0].name;
+    $("#filename").val(filename);
+  }
+</script>

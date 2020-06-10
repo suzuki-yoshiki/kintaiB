@@ -1,3 +1,4 @@
+<% provide(:title, "edit base") %>
 <% provide(:class_text, 'basic-info') %>
 <% provide(:button_text, '拠点更新') %>
  <h1>拠点情報編集</h1>
@@ -12,8 +13,9 @@
             <%= f.number_field :base_number, class: "form-control" %>
 
             <%= f.label :base_type, class: "label-#{yield(:class_text)}" %>
-            <%= f.text_field :base_type, class: "form-control" %>
-            
+            <div>
+            <%= f.select :base_type, ["出勤", "退勤"], class: "form-control" %>
+            </div>
               <%= f.submit yield(:button_text), class: "btn btn-primary btn-#{yield(:class_text)}" %>
               <button type="button" class="btn btn-default btn-<%= yield(:class_text) %>">
                 キャンセル

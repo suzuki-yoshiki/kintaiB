@@ -1,10 +1,12 @@
 class UsersController < ApplicationController
-  before_action :set_user, only: [:show, :edit, :update, :destroy, :edit_basic_info, :update_basic_info]
+  before_action :set_user, only: [:show, :confirmation_check, :edit, :update, :destroy, :edit_basic_info, :update_basic_info]
   before_action :logged_in_user, only: [:index, :show, :edit, :update, :destroy, :edit_basic_info, :update_basic_info]
   before_action :correct_user, only: [:edit, :update]
   before_action :admin_user, only: [:destroy, :edit_basic_info, :update_basic_info]
-  before_action :set_one_month, only: :show
-  before_action :admin_or_correct_user, only: [:index, :show, :edit_one_month]
+  before_action :set_one_month, only: [:show, :confirmation_check]
+  before_action :admin_or_correct_user, only: [:show, :edit_one_month]
+  #before_action :admin_user_return, only: :show
+  before_action :login_user, only: [:new, :login, :create]
   
     def index
       #条件分岐
@@ -13,7 +15,7 @@ class UsersController < ApplicationController
       User.paginate(page: params[:page]).search(params[:search])
         else
       #searchされていない場合は、原文そのまま
-      User.paginate(page: params[:page], per_page: 20)
+      User.all
         end
     end
     
@@ -21,6 +23,8 @@ class UsersController < ApplicationController
       # fileはtmpに自動で一時保存される
       if params[:file].blank?
          flash[:danger] = "CSVファイルが選択されてません。"
+      elsif File.extname(params[:file].original_filename) != ".csv"
+            flash[:danger] = "CSVファイルのみ選択してください。"
       else User.import(params[:file])
          flash[:success] = "インポートしました。"
       end
@@ -28,21 +32,24 @@ class UsersController < ApplicationController
     end
     
     def attendance_work
+      redirect_to action: "show" unless current_user.admin?
        @work_users = []
         User.all.each do |user|
           if user.attendances.any?{|a|
-            (Date.today && 
-            a.started_at.present? && 
-            a.finished_at.blank?)}
+            (Date.today &&
+            a.started_before_at.present? && 
+            a.finished_before_at.blank?)}
           @work_users.push(user)
           end
         end
     end   
     
     def show
-      @attendance = Attendance.find(params[:id])
+      redirect_to action: "index" if current_user.admin?
+      #@attendance = Attendance.find(params[:id])
       @worked_sum = @attendances.where.not(started_before_at: nil).size
       @superior = User.where(superior: true).where.not(id: current_user)
+      if @user.superior?
       all_attendance = Attendance.all
       #残業申請の件数
       @over_sum =  all_attendance.where(mark_instructor_confirmation: "申請中").where(attendances: {instructor_confirmation: @user.name}).size
@@ -50,9 +57,27 @@ class UsersController < ApplicationController
       @change_sum = all_attendance.where(mark_change_confirmation: "申請中").where(attendances: {change_confirmation: @user.name}).size
       #１ヶ月分勤怠申請の件数
       @apploval_sum = all_attendance.where(mark_apploval_confirmation: "申請中").where(attendances: {apploval_confirmation: @user.name}).size
-      @month = Date.current.beginning_of_month
+      @month = params[:date].nil? ?
+      #月ごとにデータを取得してきます。
+              Date.current.beginning_of_month : params[:date].to_date
+      @attendance = Attendance.find_by(user_id: params[:id], worked_on: @month)
       #@months = current_user.attendances.find_by(date: @first_day)
+      end
+      respond_to do |format|
+       format.html
+        #html用の処理を書く
+        format.csv do
+           send_data render_to_string, filename: "show.csv.ruby", type: :csv
+        end
+      end
     end
+    
+    #勤怠情報確認のボタン
+    def confirmation_check
+      @attendance = Attendance.find(params[:id])
+      @worked_sum = @attendances.where.not(started_before_at: nil).size
+      @superior = User.where(superior: true).where.not(id: current_user)
+    end    
     
     def new
       @user = User.new
@@ -87,6 +112,10 @@ class UsersController < ApplicationController
       redirect_to users_url
     end
     
+    def edit2_basic_info
+      redirect_to action: "show" unless current_user.admin?
+    end
+    
     def edit_basic_info
     end
   
@@ -100,6 +129,7 @@ class UsersController < ApplicationController
       end
        redirect_to users_url
     end
+
   
   private
 
@@ -115,11 +145,25 @@ class UsersController < ApplicationController
 
     # 管理権限者、または現在ログインしているユーザーを許可します。
     def admin_or_correct_user
-      User.paginate(page: params[:page], per_page: 20)
+      @user = User.find(params[:user_id]) if @user.blank?
       unless current_user.admin? || current_user?(@user)
         flash[:danger] = "権限がありません。"
         redirect_to(root_url)
       end  
+    end
+    
+    def admin_user_return
+      @user = User.find(params[:user_id]) if @user.blank?
+        current_user.admin?
+        flash[:danger] = "権限がありません。"
+        redirect_to(root_url)
+    end
+    # ログイン状態を返します。
+    def login_user
+      if @current_user
+        flash[:notice] = "すでにログイン状態です。"
+        redirect_to root_url
+      end
     end
 end 
     

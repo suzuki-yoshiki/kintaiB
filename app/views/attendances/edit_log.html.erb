@@ -1,9 +1,26 @@
 <% provide(:title, 'Attendance-Log') %>
 
-<div>
+
   <h1>勤怠ログ</h1>
-  <%= link_to "リセット", "#", class: "btn btn-default" %>
-  <p><%= date_select :worked_on, {:discard_day => true} %></p>
+   <div class="row">
+    <div class="col-md-12">
+      <%= form_with url: edit_log_user_attendance_path, method: :get, local: true do |f| %>
+           <%= submit_tag 'リセット', class: "btn btn-default" %>
+           <table class="table table-bordered table-striped table-condensed overwork-table">
+       <tbody>
+          <tr>
+            <td width = "50">年</td>
+            <td><%= f.date_select :worked_on, { discard_month: true }, class: "form-control" %></td>
+          </tr>
+          <tr>
+            <td>月</td>
+            <td><%= f.date_select :worked_on, { :discard_year => true, :discard_day => true, :use_month_numbers => true}, class: "form-control" %></td>
+          </tr>
+        </tbody>
+       </table> 
+      <% end %>
+    </div>
+  </div>
   <table class="table table-bordered table-condensed table-hover" id="table-attendances">
     <thead>
       <tr>
@@ -20,10 +37,10 @@
       <% @attendances.each do |day| %>
       <tr>
         <td><%= l(day.worked_on, format: :long_line) %></td>
-        <td><%= l(day.started_before_at, format: :hour) if day.started_before_at.present? %> : <%= format_min(day.started_before_at) %></td>
-        <td><%= l(day.finished_before_at, format: :hour) if day.finished_before_at.present? %> : <%= format_min(day.finished_before_at) %></td>
-        <td><%= l(day.started_at, format: :hour) if day.started_at.present? %> : <%= format_min(day.started_at) %></td>
-        <td><%= l(day.finished_at, format: :hour) if day.finished_at.present? %> : <%= format_min(day.finished_at) %></td>
+        <td><%= l(day.started_before_at, format: :hour) if day.started_before_at.present? %> : <%= format_min(day.started_before_at) if day.started_before_at.present? %></td>
+        <td><%= l(day.finished_before_at, format: :hour) if day.finished_before_at.present? %> : <%= format_min(day.finished_before_at) if day.finished_before_at.present? %></td>
+        <td><%= l(day.started_at, format: :hour) if day.started_at.present? %> : <%= format_min(day.started_at) if day.started_at.present? %></td>
+        <td><%= l(day.finished_at, format: :hour) if day.finished_at.present? %> : <%= format_min(day.finished_at) if day.finished_at.present? %></td>
         <td>
           <% if day.finished_at.present? && day.mark_change_confirmation == "承認" %>
            <%= day.change_confirmation %>

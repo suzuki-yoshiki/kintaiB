@@ -12,18 +12,33 @@ class Attendance < ApplicationRecord
   validate :finished_before_at_is_invalid_without_a_started_before_at
  
   # 出勤・退勤時間どちらも存在する時、出勤時間より早い退勤時間は無効
-  validate :started_before_at_than_finished_before_at_fast_if_invalid
-  
+  validate :started_at_than_finished_at_fast_if_invalid
+  validate :confirmation_mark_finished_at_without_started_at_both 
   
   def finished_before_at_is_invalid_without_a_started_before_at
     errors.add(:started_before_at, "が必要です") if started_before_at.blank? && finished_before_at.present?
   end
   
+  def confirmation_mark_finished_at_without_started_at_both 
+    if started_before_at.present? && finished_before_at.present?
+      errors.add(:change_confirmation, "が必要です") if change_confirmation.blank?
+    end
+  end
+  
  
-  def started_before_at_than_finished_before_at_fast_if_invalid
-     if started_before_at.present? && finished_before_at.present?
-      errors.add(:started_before_at, "より早い退勤時間は無効です") if started_before_at > finished_before_at
+  def started_at_than_finished_at_fast_if_invalid
+     if started_at.present? && finished_at.present?
+      errors.add(:started_at, "より早い退勤時間は無効です") if started_at > finished_at
      end
   end
+  
+  def self.search(search) #ここでのself.はAttendance.を意味する
+    if search
+      where(['worked_on LIKE ?', "%#{search}%"])#検索と日付の部分一致を表示。User.は省略
+    else
+      all #全て表示。User.は省略
+    end
+  end
+  
 end
   

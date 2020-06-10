@@ -21,4 +21,14 @@ class SessionsController < ApplicationController
   flash[:success] = 'ログアウトしました。'
   redirect_to root_url
   end
+  
+  private
+    
+     # ログイン状態を返します。
+    def login_user
+      if @current_user
+        flash[:notice] = "すでにログイン状態です。"
+        redirect_to root_url
+      end
+    end
 end

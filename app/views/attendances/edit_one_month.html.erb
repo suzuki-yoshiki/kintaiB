@@ -37,18 +37,24 @@
                   <% elsif day.worked_on.wday == 5 %>
                     <font color="black">金</font>
                   <% end %>            
-              </td>
+              </td> 
               <% if (Date.current < day.worked_on) %>
-              <td><%= attendance.time_field :started_at, readonly: true, class: "form-control" %></td>
-              <td><%= attendance.time_field :finished_at, readonly: true, class: "form-control" %></td>
+                <td><%= attendance.time_field :started_at, readonly: true, class: "form-control" %></td>
+                <td><%= attendance.time_field :finished_at, readonly: true, class: "form-control" %></td>
+              <% elsif Date.current == day.worked_on && day.finished_before_at.blank? %>
+                <td><%= attendance.time_field :started_before_at, readonly: true, class: "form-control" %></td>
+                <td><%= attendance.time_field :finished_before_at, readonly: true, class: "form-control" %></td>
+              <% elsif day.started_before_at.present? && day.started_at.blank? %>
+                <td><%= attendance.time_select :started_at, {default: day.started_before_at}, {class: "form-control" } %></td>
+                <td><%= attendance.time_select :finished_at, {default: day.finished_before_at}, {class: "form-control"} %></td>
               <% else %>
-              <td><%= attendance.time_field :started_at, class: "form-control" %></td>
-              <td><%= attendance.time_field :finished_at, class: "form-control" %></td>
+                <td><%= attendance.time_field :started_at, class: "form-control" %></td>
+                <td><%= attendance.time_field :finished_at, class: "form-control" %></td>
               <% end %>
-              <td><%= attendance.check_box :tomorrow, id: "remember-me" %></td>
+              <td><%= attendance.check_box :tomorrow_at %></td>
               <td>
                   <% if day.started_at.present? && day.finished_at.present? %>
-                   <%= working_times(day.started_before_at, day.finished_before_at) %>
+                   <%= working_times(day.started_at, day.finished_at) %>
                   <% end %>
               </td>
               <td><%= attendance.text_field :note, class: "form-control" %></td>
