@@ -18,6 +18,7 @@ Rails.application.routes.draw do
     end
   resources :attendances, only: :update do
     member do
+      get 'users/show', to: 'users#show'
       get 'edit_one_month'
       patch 'update_one_month'
       get 'users/confirmation_check' #勤怠確認

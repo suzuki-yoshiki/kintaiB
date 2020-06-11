@@ -115,14 +115,14 @@
           <td>
             <% if day.started_before_at.present? && day.started_at.blank? %>
              <%= l(day.started_before_at, format: :hour) %>
-            <% elsif day.started_at.present? && day.mark_change_confirmation == "承認" %>
+            <% elsif day.started_at.present?  %>
              <%= l(day.started_at, format: :hour) %>
             <% end %>
           </td>
           <td>
             <% if day.started_before_at.present? && day.started_at.blank? %>
              <%= format_min(day.started_before_at)  %>
-            <% elsif day.started_at.present? && day.mark_change_confirmation == "承認" %>
+            <% elsif day.started_at.present? %>
              <%= format_min(day.started_at) %>
             <% end %>
           </td>
@@ -134,68 +134,51 @@
           <td>
             <% if day.finished_before_at.present? && day.finished_at.blank? %>
              <%= l(day.finished_before_at, format: :hour) %>
-            <% elsif day.finished_at.present? && day.mark_change_confirmation == "承認" %>
+            <% elsif day.finished_at.present? %>
              <%= l(day.finished_at, format: :hour) %>
             <% end %>
           </td>
           <td>
             <% if day.finished_before_at.present? && day.finished_at.blank? %>
              <%= format_min(day.finished_before_at) %>
-            <% elsif day.finished_at.present? && day.mark_change_confirmation == "承認" %>
+            <% elsif day.finished_at.present? %>
              <%= format_min(day.finished_at) %>
             <% end %>
           </td>
           <td></td>
           <td colspan = "4">
-             <% if day.tomorrow_at == false %>
-              <% if day.started_before_at.present? && day.finished_before_at.present? %>
-              <%= str_times = working_times(day.started_before_at, day.finished_before_at) %>
-              <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
-              <% elsif day.started_at.present? && day.finished_at.present? && day.mark_change_confirmation == "承認"%>
-              <%= working_times(day.started_at, day.finished_at) %>
+              <% if day.started_before_at.present? && day.finished_before_at.present? && day.started_at.blank? %>
+                <%= str_times = working_times(day.started_before_at, day.finished_before_at) %>
+                <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
+              <% elsif day.started_at.present? && day.finished_at.present? %>
+                <%= str_times = working_times(day.started_at, day.finished_at) %>
+                <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
               <% end %>
-             <% elsif day.tomorrow_at == true %>
-              <% if day.started_before_at.present? && day.finished_before_at.present? %>
-              <%= str_times = working_times(day.started_before_at, day.finished_before_at) %>
-              <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
-              <% elsif day.started_at.present? && day.finished_at.present? && day.mark_change_confirmation == "承認"%>
-              <%= working_tommorow_times(day.started_at, day.finished_at) %>
-              <% end %>
-            <% else %>
-             <% if day.started_before_at.present? && day.finished_before_at.present? %>
-              <%= str_times = working_times(day.started_before_at, day.finished_before_at) %>
-              <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
-              <% elsif day.started_at.present? && day.finished_at.present? && day.mark_change_confirmation == "承認"%>
-              <%= working_times(day.started_at, day.finished_at) %>
-              <% end %>
-             <% end %>
           </td>
           <td>
-            <% if day.note.present? && day.mark_change_confirmation == "承認" %>
+            <% if day.note.present? %>
             <%= day.note %>
             <% end %>
           </td>
           <td>
-            <% if day.finished_plan_at.present? && day.mark_instructor_confirmation == "承認" %>
+            <% if day.finished_plan_at.present? %>
             <%= l(day.finished_plan_at, format: :hour) %>
             <% end %>
           </td>
           <td>
-            <% if day.finished_plan_at.present? && day.mark_instructor_confirmation == "承認" %>
-            <%= format_min(day.finished_plan_at) if day.finished_plan_at.present? %>
+            <% if day.finished_plan_at.present? %>
+            <%= format_min(day.finished_plan_at) %>
             <% end %>
           </td>
           <td colspan = "2">
-             <% if day.finished_plan_at.present? && day.mark_instructor_confirmation == "承認" && day.tomorrow == false %>
-              <% if over_times(day.started_at, day.finished_plan_at, @user.basic_work_time) %>
+             <% if day.finished_plan_at.present? && day.started_at.present? %>
               <%= over_times(day.started_at, day.finished_plan_at, @user.basic_work_time) %>
-              <% end %>
-             <% elsif day.finished_plan_at.present? && day.mark_instructor_confirmation == "承認" && day.tomorrow == true %>
-              <%= over_times(day.started_at, day.finished_plan_at, @user.basic_work_time) %>
+             <% elsif day.finished_plan_at.present? && day.started_at.present? %>
+              <%= over_times(day.started_at, day.finished_at, @user.basic_work_time) %>
              <% end %>
           </td>
           <td colspan = "2">
-            <% if day.business_process_content.present? && day.mark_instructor_confirmation == "承認" %>
+            <% if day.business_process_content.present? %>
             <%= day.business_process_content %>
             <% end %>
           </td>

@@ -74,9 +74,9 @@ class AttendancesController < ApplicationController
   
   #１ヶ月分勤怠申請
   def apploval_one_month
-      @attendance = Attendance.find(params[:id])
+      attendance = Attendance.find(params[:id])
       if params[:attendance][:apploval_confirmation].present?
-         @attendance.update_attributes(apploval_one_month_params)
+         attendance.update_attributes(apploval_one_month_params)
          flash[:success] = "１ヶ月分の勤怠を申請しました。"
       else
          flash[:danger] = "１ヶ月分勤怠申請できません。"
@@ -87,7 +87,7 @@ class AttendancesController < ApplicationController
   #１ヶ月分勤怠申請モーダル
   def apploval_one_month_info
     @users = User.joins(:attendances).group("users.id").where(attendances: {mark_apploval_confirmation: "申請中"}).where(attendances: {apploval_confirmation: current_user.name})
-    @attendances = Attendance.where.not(apploval_month: nil).where(mark_apploval_confirmation: "申請中").order("worked_on ASC")
+    @attendances = Attendance.where.not(worked_on: nil).where(mark_apploval_confirmation: "申請中").order("worked_on ASC")
     @month = Date.current.beginning_of_month
   end
   

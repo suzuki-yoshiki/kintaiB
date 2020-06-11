@@ -22,7 +22,7 @@ module AttendancesHelper
   
   #指定勤務終了時間と終了予定時間を受け取り、時間外時間を計算して返します。
   def over_times(start, finish, time)
-    if start.hour < 24
+    if start.hour < 12
       format("%.2f", (((finish - start) / 60) / 60.0) - (((time.hour * 60) + time.min) / 60.0) - 1)
     else
       format("%.2f", (((finish - start) / 60) / 60.0) - (((time.hour * 60) + time.min) / 60.0))

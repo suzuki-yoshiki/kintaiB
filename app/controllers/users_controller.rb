@@ -6,7 +6,7 @@ class UsersController < ApplicationController
   before_action :set_one_month, only: [:show, :confirmation_check]
   before_action :admin_or_correct_user, only: [:show, :edit_one_month]
   #before_action :admin_user_return, only: :show
-  before_action :login_user, only: [:new, :login, :create]
+  before_action :limitation_login_user, only: [:new, :login, :create]
   
     def index
       #条件分岐
@@ -57,12 +57,12 @@ class UsersController < ApplicationController
       @change_sum = all_attendance.where(mark_change_confirmation: "申請中").where(attendances: {change_confirmation: @user.name}).size
       #１ヶ月分勤怠申請の件数
       @apploval_sum = all_attendance.where(mark_apploval_confirmation: "申請中").where(attendances: {apploval_confirmation: @user.name}).size
+      end
       @month = params[:date].nil? ?
       #月ごとにデータを取得してきます。
               Date.current.beginning_of_month : params[:date].to_date
       @attendance = Attendance.find_by(user_id: params[:id], worked_on: @month)
       #@months = current_user.attendances.find_by(date: @first_day)
-      end
       respond_to do |format|
        format.html
         #html用の処理を書く
@@ -138,7 +138,7 @@ class UsersController < ApplicationController
     end
     
     def user_info_params
-      params.permit(:name, :email, :password, :affiliation, :employee_number, :uid, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
+      params.require(:user).permit(:name, :email, :password, :affiliation, :employee_number, :uid, :basic_work_time, :designated_work_start_time, :designated_work_end_time)
     end
     
      # beforeフィルター
@@ -159,7 +159,7 @@ class UsersController < ApplicationController
         redirect_to(root_url)
     end
     # ログイン状態を返します。
-    def login_user
+    def limitation_login_user
       if @current_user
         flash[:notice] = "すでにログイン状態です。"
         redirect_to root_url

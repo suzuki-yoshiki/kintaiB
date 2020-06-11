@@ -20,7 +20,7 @@ class Attendance < ApplicationRecord
   end
   
   def confirmation_mark_finished_at_without_started_at_both 
-    if started_before_at.present? && finished_before_at.present?
+    if started_at.present? && finished_at.present?
       errors.add(:change_confirmation, "が必要です") if change_confirmation.blank?
     end
   end

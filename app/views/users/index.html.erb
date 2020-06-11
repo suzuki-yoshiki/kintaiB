@@ -44,7 +44,7 @@
       </div>
       <% if user.id %>
      <div id="<%= user.id %>" class="panel-collapse collapse", data-turbolinks="false">
-              <%= form_with(model: @user, url: update_basic_info_user_path(user), local: true, method: :patch) do |f| %>
+              <%= form_with(model: @user, url: update_basic_info_user_path(@user), local: true, method: :patch) do |f| %>
                
               
                 <%= f.label :name, "名前", class: "label-#{yield(:class_text)}" %>
