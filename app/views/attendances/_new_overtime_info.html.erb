@@ -28,8 +28,9 @@
               <td>勤怠を確認</td>
             </tr>
            </thead>
-           <% @attendances.each do |a| %>
+           <% @attendance.each do |a| %>
             <%= f.fields_for "attendances[]", a do |i| %>
+             <%= i.hidden_field :instructor_confirmation, :value => @user.name %>
              <% if a.user_id == user.id && a.mark_instructor_confirmation == "申請中" && current_user.name == a.instructor_confirmation %>
            <tbody>
             <tr>
@@ -54,12 +55,16 @@
               <td><%= l(a.finished_plan_at, format: :time) %></td>
               <td><%= l(user.designated_work_end_time, format: :time) %></td>
               <td>
-                  <%= over_times(a.started_at, a.finished_plan_at, @user.basic_work_time) %>
+                  <% if a.finished_plan_at.present? && a.started_at.present? %>
+                    <%= over_times(a.started_at, a.finished_plan_at, @user.basic_work_time) %>
+                  <% elsif a.finished_plan_at.present? %>
+                    <%= over_times(a.started_at, a.finished_at, @user.basic_work_time) %>
+                  <% end %>
               </td>
               <td><%= a.business_process_content %></td>
               <td><%= i.select :mark_instructor_confirmation, Attendance.mark_instructor_confirmations.keys, { include_blank: true } %></td>
               <td><%= i.check_box :change %></td>
-              <td><%= link_to "確認", users_confirmation_check_user_attendance_path(@user, id: a.user_id, date: a.worked_on), class: "btn btn-primary" %></td>
+              <td><%= link_to "確認", users_confirmation_check_user_attendance_path(@user, id: a.user_id, date: @first_day), class: "btn btn-primary" %></td>
             </tr>
             </tbody>
             <% end %>

@@ -26,13 +26,16 @@
                          <tbody>
                          <% @attendances.each do |date| %>
                           <%= f.fields_for "attendances[]", date do |i| %>
+                          <%= i.hidden_field :apploval_confirmation, :value => @user.name %>
+                           <% if date.user_id == user.id && date.mark_apploval_confirmation == "申請中" && current_user.name == date.apploval_confirmation %>
                               <tr>
-                                <td><%= l(date.worked_on, format: :long_line) if date.apploval_month.present? %>月</td>
+                                <td><%= l(date.worked_on, format: :month) if date.apploval_month.present? %>月</td>
                                 <td><%= i.select :mark_apploval_confirmation, Attendance.mark_apploval_confirmations.keys.to_a, { include_blank: true } %></td>
                                 <td><%= i.check_box :change_apploval %></td>
-                                <td><%= link_to "確認", users_confirmation_check_user_attendance_path(@user, id: date.user_id, date: date.worked_on), class: "btn btn-primary" %></td>
+                                <td><%= link_to "確認", users_confirmation_check_user_attendance_path(@user, id: date.user_id, date: date.apploval_month), class: "btn btn-primary" %></td>
                               </tr>
                         </tbody>
+                       <% end %>
                       <% end %>
                      <% end %>
                   </table>

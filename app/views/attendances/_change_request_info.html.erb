@@ -46,6 +46,8 @@
              <tbody>
               <% @attendances.each do |day| %>
                <%= f.fields_for "attendances[]", day do |i| %>
+               <%= i.hidden_field :change_confirmation, :value => @user.name %>
+               <%= i.hidden_field :change_date, :value => Date.today %>
                <% if day.user_id == user.id && day.mark_change_confirmation == "申請中" && current_user.name == day.change_confirmation %>
                 <tr>
                   <td><%= l(day.worked_on, format: :short) %></td>
@@ -66,18 +68,34 @@
                       <font color="black">金</font>
                     <% end %>            
                   </td>
-                  <td><%= l(day.started_before_at, format: :hour) if day.started_before_at.present? %></td>
-                  <td><%= format_min(day.started_before_at) if day.started_before_at.present? %></td>
-                  <td><%= l(day.finished_before_at, format: :hour) if day.finished_before_at.present? %></td>
-                  <td><%= format_min(day.finished_before_at) if day.finished_before_at.present? %></td>
-                  <td><%= l(day.started_at, format: :hour) if day.started_at.present? %></td>
-                  <td><%= format_min(day.started_at) if day.started_at.present? %></td>
-                  <td><%= l(day.finished_at, format: :hour) if day.finished_at.present? %></td>
-                  <td><%= format_min(day.finished_at) if day.finished_at.present? %></td>
+                  <% if day.started_at.present? %>
+                    <td><%= l(day.started_at, format: :hour) %></td>
+                    <td><%= format_min(day.started_at) %></td>
+                  <% elsif day.started_before_at.present? %>
+                    <td><%= l(day.started_before_at, format: :hour) %></td>
+                    <td><%= format_min(day.started_before_at) %></td>
+                  <% else %>
+                    <td></td>
+                    <td></td>
+                  <% end %>
+                  <% if day.finished_at.present? %>
+                    <td><%= l(day.finished_at, format: :hour) if day.finished_at.present? %></td>
+                    <td><%= format_min(day.finished_at) if day.finished_at.present? %></td>
+                  <% elsif day.finished_before_at.present? %>
+                    <td><%= l(day.finished_before_at, format: :hour) if day.finished_before_at.present? %></td>
+                    <td><%= format_min(day.finished_before_at) if day.finished_before_at.present? %></td>
+                  <% else %>
+                    <td></td>
+                    <td></td>
+                  <% end %>
+                  <td><%= l(day.started_edit_at, format: :hour) if day.started_edit_at.present? %></td>
+                  <td><%= format_min(day.started_edit_at) if day.started_edit_at.present? %></td>
+                  <td><%= l(day.finished_edit_at, format: :hour) if day.finished_edit_at.present? %></td>
+                  <td><%= format_min(day.finished_edit_at) if day.finished_edit_at.present? %></td>
                   <td><%= day.note %></td>
                   <td><%= i.select :mark_change_confirmation, Attendance.mark_change_confirmations.keys, { include_blank: true } %></td>
                   <td><%= i.check_box :change_at %></td>
-                  <td><%= link_to "確認", users_confirmation_check_user_attendance_path(@user, id: day.user_id, date: day.worked_on), class: "btn btn-primary" %></td>
+                  <td><%= link_to "確認", users_confirmation_check_user_attendance_path(@user, id: day.user_id, date: day.change_month), class: "btn btn-primary" %></td>
                 </tr>
             </tbody>
             <% end %>

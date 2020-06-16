@@ -7,6 +7,8 @@ class BasesController < ApplicationController
     end
     
     def new
+      @number = Base.where.not(base_number:nil).count
+      @number = @number.to_i + 1
       @base = Base.new
     end
     

@@ -18,7 +18,10 @@
       <tbody>
         <% @attendances.each do |day| %>
           <%= f.fields_for "attendances[]", day do |attendance| %>
+          <%= attendance.hidden_field :user_id, :value => @user.id %> <!--usersテーブルのid（つまりログインしているユーザーのid)をvalueに指定している-->
           <%= attendance.hidden_field :mark_change_confirmation, :value => "申請中" %>
+          <%= attendance.hidden_field :worked_on, :value => day.worked_on %>
+          <%= attendance.hidden_field :change_month, :value => @first_day %>
             <tr>
               <td><%= l(day.worked_on, format: :short) %></td>
               <td>
@@ -38,23 +41,38 @@
                     <font color="black">金</font>
                   <% end %>            
               </td> 
-              <% if (Date.current < day.worked_on) %>
-                <td><%= attendance.time_field :started_at, readonly: true, class: "form-control" %></td>
-                <td><%= attendance.time_field :finished_at, readonly: true, class: "form-control" %></td>
-              <% elsif Date.current == day.worked_on && day.finished_before_at.blank? %>
-                <td><%= attendance.time_field :started_before_at, readonly: true, class: "form-control" %></td>
-                <td><%= attendance.time_field :finished_before_at, readonly: true, class: "form-control" %></td>
-              <% elsif day.started_before_at.present? && day.started_at.blank? %>
-                <td><%= attendance.time_select :started_at, {default: day.started_before_at}, {class: "form-control" } %></td>
-                <td><%= attendance.time_select :finished_at, {default: day.finished_before_at}, {class: "form-control"} %></td>
-              <% else %>
-                <td><%= attendance.time_field :started_at, class: "form-control" %></td>
-                <td><%= attendance.time_field :finished_at, class: "form-control" %></td>
+              <% if Date.current < day.worked_on %>
+                <td><%= attendance.time_field :started_edit_at, readonly: true, class: "form-control" %></td>
+                <td><%= attendance.time_field :finished_edit_at, readonly: true, class: "form-control" %></td>
+              <% else  %>
+                <td>
+                  <% if day.started_edit_at.present? %>
+                    <%= attendance.time_field :started_edit_at, class: "form-control" %>
+                  <% else day.started_at.present? %>
+                    <% day.started_edit_at = day.started_at %>
+                    <%= attendance.time_field :started_edit_at, class: "form-control" %>
+                  <% end %>
+                </td>
+                <td>
+                  <% if day.finished_edit_at.present? %>
+                    <%= attendance.time_field :finished_edit_at, class: "form-control" %>
+                  <% else day.finished_at.present? %>
+                    <% day.finished_edit_at = day.finished_at %>
+                    <%= attendance.time_field :finished_edit_at, class: "form-control" %>
+                  <% end %>
+                </td>
               <% end %>
+              <!--< % elsif day.started_before_at.present? && day.started_at.blank? %>-->
+              <!--  <td>< %= attendance.time_select :started_at, {default: day.started_before_at}, {class: "form-control" } %></td>-->
+              <!--  <td>< %= attendance.time_select :finished_at, {default: day.finished_before_at}, {class: "form-control"} %></td>-->
+              <!--< % else %>-->
+              <!--  <td>< %= attendance.time_field :started_at, class: "form-control" %></td>-->
+              <!--  <td>< %= attendance.time_field :finished_at, class: "form-control" %></td>-->
+              <!--< % end %>-->
               <td><%= attendance.check_box :tomorrow_at %></td>
               <td>
-                  <% if day.started_at.present? && day.finished_at.present? %>
-                   <%= working_times(day.started_at, day.finished_at) %>
+                  <% if day.started_edit_at.present? && day.finished_edit_at.present? %>
+                   <%= working_times(day.started_edit_at.floor_to(60*15), day.finished_edit_at.floor_to(60*15)) %>
                   <% end %>
               </td>
               <td><%= attendance.text_field :note, class: "form-control" %></td>
@@ -66,7 +84,7 @@
     </table>
   </div>
   <div class="center">
-    <%= link_to "キャンセル", user_path(date: @first_day), class: "btn btn-lg btn-default" %>
+    <%= link_to "キャンセル", user_path(date: @first_day), class: "btn btn-lg btn-primary" %>
     <%= f.submit "編集を申請する", class: "btn btn-lg btn-primary" %>
   </div>
 <% end %>

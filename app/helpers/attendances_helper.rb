@@ -3,8 +3,8 @@ module AttendancesHelper
   def attendance_state(attendance)
     # 受け取ったAttendanceオブジェクトが当日と一致するか評価します。
     if Date.current == attendance.worked_on
-      return '出社' if attendance.started_before_at.nil? 
-      return '退勤' if attendance.started_before_at.present? && attendance.finished_before_at.nil?
+      return '出社' if attendance.started_at.nil? 
+      return '退勤' if attendance.started_at.present? && attendance.finished_at.nil?
     end
     # どれにも当てはまらなかった場合はfalseを返します。
     false
@@ -15,14 +15,15 @@ module AttendancesHelper
     format("%.2f", (((finish - start) / 60) / 60.0))
   end
   
+  
     # 出勤時間と退勤時間を受け取り、在社時間を計算して返します。翌日
   def working_tommorow_times(start, finish)
-    format("%.2f", (((finish - start) / 60) / 60.0) + 24.0)
+    format("%.2f", (((designated_work_end_time - finished_plan_at) / 60) / 60.0))
   end
   
   #指定勤務終了時間と終了予定時間を受け取り、時間外時間を計算して返します。
   def over_times(start, finish, time)
-    if start.hour < 12
+    if start.hour < 12 && finish.hour >= 13
       format("%.2f", (((finish - start) / 60) / 60.0) - (((time.hour * 60) + time.min) / 60.0) - 1)
     else
       format("%.2f", (((finish - start) / 60) / 60.0) - (((time.hour * 60) + time.min) / 60.0))

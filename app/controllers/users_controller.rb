@@ -37,8 +37,8 @@ class UsersController < ApplicationController
         User.all.each do |user|
           if user.attendances.any?{|a|
             (Date.today &&
-            a.started_before_at.present? && 
-            a.finished_before_at.blank?)}
+            a.started_at.present? && 
+            a.finished_at.blank?)}
           @work_users.push(user)
           end
         end
@@ -47,8 +47,8 @@ class UsersController < ApplicationController
     def show
       redirect_to action: "index" if current_user.admin?
       #@attendance = Attendance.find(params[:id])
-      @worked_sum = @attendances.where.not(started_before_at: nil).size
-      @superior = User.where(superior: true).where.not(id: current_user)
+      @worked_sum = @attendances.where.not(started_at: nil).size
+      @superior = User.where(superior: true).where.not(id: @user.id)
       if @user.superior?
       all_attendance = Attendance.all
       #残業申請の件数
@@ -59,7 +59,6 @@ class UsersController < ApplicationController
       @apploval_sum = all_attendance.where(mark_apploval_confirmation: "申請中").where(attendances: {apploval_confirmation: @user.name}).size
       end
       @month = params[:date].nil? ?
-      #月ごとにデータを取得してきます。
               Date.current.beginning_of_month : params[:date].to_date
       @attendance = Attendance.find_by(user_id: params[:id], worked_on: @month)
       #@months = current_user.attendances.find_by(date: @first_day)
@@ -74,9 +73,11 @@ class UsersController < ApplicationController
     
     #勤怠情報確認のボタン
     def confirmation_check
-      @attendance = Attendance.find(params[:id])
-      @worked_sum = @attendances.where.not(started_before_at: nil).size
-      @superior = User.where(superior: true).where.not(id: current_user)
+      @worked_sum = @attendances.where.not(started_at: nil).size
+      @superior = User.where(superior: true).where.not(id: @user.id)
+      @month = params[:date].nil? ?
+              Date.current.beginning_of_month : params[:date].to_date
+      @attendance = Attendance.find_by(user_id: params[:id], worked_on: @month)
     end    
     
     def new
@@ -102,6 +103,7 @@ class UsersController < ApplicationController
          flash[:success] = "ユーザー情報を更新しました。"
          redirect_to @user# 更新に成功した場合の処理を記述します。
       else
+         flash[:danger] = "ユーザー情報の更新に失敗しました。"
          render :edit      
       end
     end
@@ -120,14 +122,30 @@ class UsersController < ApplicationController
     end
   
     def update_basic_info
-      if @user.update_attributes(user_info_params)
-       # 更新成功時の処理
-       flash[:success] = "#{@user.name}の基本情報を更新しました。"
-      else
-       # 更新失敗時の処理
-       flash[:danger] = "#{@user.name}の更新は失敗しました。<br>" + @user.errors.full_messages.join("<br>")
-      end
-       redirect_to users_url
+      if params[:user][:employee_number].blank?
+        flash[:danger] = "社員番号が入力されていません。"
+        redirect_to users_url and return
+      elsif params[:user][:uid].blank?
+        flash[:danger] = "カードIDが入力されていません。"
+        redirect_to users_url and return
+      elsif params[:user][:basic_work_time].blank?
+        flash[:danger] = "基本勤務時間が入力されていません。"
+        redirect_to users_url and return
+      elsif params[:user][:designated_work_start_time].blank?
+        flash[:danger] = "指定勤務開始時間が入力されていません。"
+        redirect_to users_url and return
+      elsif params[:user][:designated_work_end_time].blank?
+        flash[:danger] = "指定勤務終了時間が入力されていません。"
+        redirect_to users_url and return
+      end 
+        if @user.update_attributes(user_info_params)
+         # 更新成功時の処理
+         flash[:success] = "#{@user.name}の基本情報を更新しました。"
+        else
+         # 更新失敗時の処理
+         flash[:danger] = "更新に失敗しました。<br>" + @user.errors.full_messages.join("<br>")
+        end
+         redirect_to users_url
     end
 
   

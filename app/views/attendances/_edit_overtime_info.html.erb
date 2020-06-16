@@ -12,10 +12,10 @@
     <div class="modal-body">
       <div class="row">
         <div class="col-md-6 col-md-offset-3">
-          <%= form_with(model: @attendance, url: request_overtime_user_attendance_path(@user, @attendance), local: true, method: :patch) do |f| %>
-            <%= f.hidden_field :id, :value => @attendance.id %> <!-- attendancesテーブルのidを渡す -->
-            <%= f.hidden_field :user_id, :value => @user.id %> <!--usersテーブルのid（つまりログインしているユーザーのid)をvalueに指定している-->
+          <%= form_with(model: @attendances, url: request_overtime_user_attendance_path(@user, @attendances), local: true, method: :patch) do |f| %>
             <%= f.hidden_field :mark_instructor_confirmation, :value => "申請中" %>
+            <%= f.hidden_field :overtime_month, :value => @first_day %>
+            <%= f.hidden_field :worked_on, :value => @first_day %>
             <table class="table table-bordered table-condensed user-table">
                <thead> 
                 <tr>
@@ -29,21 +29,21 @@
                </thead>
                <tbody>
                 <tr>
-                  <td><%= l(@attendance.worked_on, format: :short) %></td>
+                  <td><%= l(@attendances.worked_on, format: :short) %></td>
                   <td>
-                    <% if @attendance.worked_on.wday == 6 %>
+                    <% if @attendances.worked_on.wday == 6 %>
                       <font color="blue">土</font>
-                    <% elsif @attendance.worked_on.wday == 0 %>
+                    <% elsif @attendances.worked_on.wday == 0 %>
                       <font color="red">日</font>
-                    <% elsif @attendance.worked_on.wday == 1 %>
+                    <% elsif @attendances.worked_on.wday == 1 %>
                       <font color="black">月</font>
-                    <% elsif @attendance.worked_on.wday == 2 %>
+                    <% elsif @attendances.worked_on.wday == 2 %>
                       <font color="black">火</font>
-                    <% elsif @attendance.worked_on.wday == 3 %>
+                    <% elsif @attendances.worked_on.wday == 3 %>
                       <font color="black">水</font>
-                    <% elsif @attendance.worked_on.wday == 4 %>
+                    <% elsif @attendances.worked_on.wday == 4 %>
                       <font color="black">木</font>
-                    <% elsif @attendance.worked_on.wday == 5 %>
+                    <% elsif @attendances.worked_on.wday == 5 %>
                       <font color="black">金</font>
                     <% end %>            
                   </td>

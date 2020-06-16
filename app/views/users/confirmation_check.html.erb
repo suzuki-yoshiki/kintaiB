@@ -81,40 +81,37 @@
             <% end %>            
           </td>
           <td>
-            <% if day.started_before_at.present? && day.started_at.blank? %>
-             <%= l(day.started_before_at, format: :hour) %>
-            <% elsif day.started_at.present? %>
+            <!--< % if day.started_before_at.present? && day.started_at.blank? %>-->
+            <!-- < %= l(day.started_before_at, format: :hour) %>-->
+            <% if day.started_at.present? %>
              <%= l(day.started_at, format: :hour) %>
             <% end %>
           </td>
           <td>
-            <% if day.started_before_at.present? && day.started_at.blank? %>
-             <%= format_min(day.started_before_at)  %>
-            <% elsif day.started_at.present? %>
+            <!--< % if day.started_before_at.present? && day.started_at.blank? %>-->
+            <!-- < %= format_min(day.started_before_at)  %>-->
+            <% if day.started_at.present? %>
              <%= format_min(day.started_at) %>
             <% end %>
           </td>
           <td></td>
           <td>
-            <% if day.finished_before_at.present? && day.finished_at.blank? %>
-             <%= l(day.finished_before_at, format: :hour) %>
-            <% elsif day.finished_at.present? %>
+            <!--< % if day.finished_before_at.present? && day.finished_at.blank? %>-->
+            <!-- < %= l(day.finished_before_at, format: :hour) %>-->
+            <% if day.finished_at.present? %>
              <%= l(day.finished_at, format: :hour) %>
             <% end %>
           </td>
           <td>
-            <% if day.finished_before_at.present? && day.finished_at.blank? %>
-             <%= format_min(day.finished_before_at) %>
-            <% elsif day.finished_at.present? %>
+            <!--< % if day.finished_before_at.present? && day.finished_at.blank? %>-->
+            <!-- < %= format_min(day.finished_before_at) %>-->
+            <% if day.finished_at.present? %>
              <%= format_min(day.finished_at) %>
             <% end %>
           </td>
           <td></td>
           <td colspan = "4">
-              <% if day.started_before_at.present? && day.finished_before_at.present? && day.started_at.blank? %>
-                <%= str_times = working_times(day.started_before_at, day.finished_before_at) %>
-                <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
-              <% elsif day.started_at.present? && day.finished_at.present? %>
+              <% if day.started_at.present? && day.finished_at.present? %>
                 <%= str_times = working_times(day.started_at, day.finished_at) %>
                 <% @total_working_times = @total_working_times.to_f + str_times.to_f %>
               <% end %>
@@ -124,8 +121,23 @@
             <%= day.note %>
             <% end %>
           </td>
-          <td><%= l(day.finished_plan_at, format: :hour) if day.finished_plan_at.present? %></td>
-          <td><%= format_min(day.finished_plan_at) if day.finished_plan_at.present? %></td>
+          <td>
+            <% if day.finished_plan_at.blank? && day.finished_at.present? %>
+              <% if (day.finished_at.hour > @user.designated_work_end_time.hour) ||
+                    ((day.finished_at.hour == @user.designated_work_end_time.hour) &&
+                    (day.finished_at.min > @user.designated_work_end_time.min)) %>
+                    <% day.finished_plan_at = day.finished_at %>
+              <% end %>
+            <% end %>
+            <% if day.finished_plan_at.present? %>
+              <%= l(day.finished_plan_at, format: :hour) %>
+            <% end %>
+          </td>
+          <td>
+            <% if day.finished_plan_at.present? %>
+              <%= format_min(day.finished_plan_at) %>
+            <% end %>
+          </td>
           <td colspan = "2">
              <% if day.finished_plan_at.present? && day.started_at.present? %>
               <%= over_times(day.started_at, day.finished_plan_at, @user.basic_work_time) %>
@@ -139,16 +151,21 @@
             <% end %>
           </td>
           <td colspan = "2">
-             <% if day.mark_instructor_confirmation.present? && day.finished_plan_at.present? %>
-              <%= day.instructor_confirmation %> 残業<%= day.mark_instructor_confirmation %>
-             <% else %>
-             
-             <% end %>
-             <% if day.mark_change_confirmation.present? && day.finished_at.present? %>
-              <%= day.change_confirmation %> 勤怠変更<%= day.mark_change_confirmation %>
-             <% else %>
-               
-             <% end %>
+             <% if day.overtime_instructor_confirmation.present? && day.edit_change_confirmation.present? %>
+              <%= day.overtime_instructor_confirmation %><br>
+              <%= day.edit_change_confirmation %>
+            <% elsif day.overtime_instructor_confirmation.present? %>
+              <%= day.overtime_instructor_confirmation %>
+            <% elsif day.edit_change_confirmation.present? %>
+              <%= day.edit_change_confirmation %>
+            <% elsif day.mark_instructor_confirmation == "申請中" && day.mark_change_confirmation == "申請中" %>
+              <%= "#{day.instructor_confirmation}へ残業#{day.mark_instructor_confirmation}" %><br>
+              <%= "#{day.change_confirmation}へ勤怠変更#{day.mark_change_confirmation}" %>
+            <% elsif day.mark_instructor_confirmation == "申請中" %>
+              <%= "#{day.instructor_confirmation}へ残業#{day.mark_instructor_confirmation}" %>
+            <% elsif day.mark_change_confirmation == "申請中" %>
+              <%= "#{day.change_confirmation}へ勤怠変更#{day.mark_change_confirmation}" %>
+            <% end %>
           </td>
         </tr>
        <% end %>
@@ -164,11 +181,13 @@
         <td colspan="4"><%= format("%.2f", @total_working_times.to_f) %></td>
         <td colspan="8"></td>
         <td colspan="2">
-          <% if @attendance.mark_apploval_confirmation.present? %>
-            <span>所属長承認  <%= @attendance.apploval_confirmation %>【<%= @attendance.mark_apploval_confirmation %>】</span>
-          <% else %>
+          <% if @attendance.mark_apploval_confirmation == "申請中" %>
+              <span>所属長承認  <%= "#{@attendance.apploval_confirmation}に#{@attendance.mark_apploval_confirmation}" %></span>
+            <% elsif @attendance.mark_apploval_confirmation == "承認" || @attendance.mark_apploval_confirmation == "否認" %>
+              <span>所属長承認 <%= "#{@attendance.apploval_confirmation}から#{@attendance.edit_apploval_confirmation}" %></span>
+            <% else %>
             <span>所属長承認 【未】</span>
-          <% end %>
+            <% end %>
         </td>
       </tr>
     </tfoot>

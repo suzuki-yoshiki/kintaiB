@@ -8,7 +8,8 @@
             
             <%= f.label :base_name, class: "label-#{yield(:class_text)}" %>
             <%= f.text_field :base_name, class: "form-control" %>
-
+            
+            <% @base.base_number = @number %>
             <%= f.label :base_number, class: "label-#{yield(:class_text)}" %>
             <%= f.number_field :base_number, class: "form-control" %>
 
