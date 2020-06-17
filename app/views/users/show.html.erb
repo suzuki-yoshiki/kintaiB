@@ -184,9 +184,9 @@
           </td>
           <td colspan = "2">
              <% if day.finished_plan_at.present? && day.started_at.present? %>
-              <%= over_times(day.started_at, day.finished_plan_at, @user.basic_work_time) %>
+              <%= today_times(day.started_at, day.finished_plan_at, @user.basic_work_time) %>
              <% elsif day.finished_plan_at.present? %>
-              <%= over_times(day.started_at, day.finished_at, @user.basic_work_time) %>
+              <%= today_times(day.started_at, day.finished_at, @user.basic_work_time) %>
              <% end %>
           </td>
           <td colspan = "2">
