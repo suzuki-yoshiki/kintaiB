@@ -36,12 +36,12 @@ module AttendancesHelper
   end
 
   # 残業翌日時間を計算して返します。false
-  def today_times(start, finish, time)
+  def today_times(start, finish)
     format("%.2f", (((finish - (start + (finish.beginning_of_day - start.beginning_of_day))) / 60) / 60.0))
   end  
   
   # 残業翌日時間を計算して返します。true
-  def tomorrow_times(start, finish, time)
+  def tomorrow_times(start, finish)
     format("%.2f", (((finish - (start + (finish.beginning_of_day - start.beginning_of_day))) / 60) / 60.0) + 24.0)
   end
   

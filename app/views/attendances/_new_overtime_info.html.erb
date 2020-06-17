@@ -55,11 +55,16 @@
               <td><%= l(a.finished_plan_at, format: :time) %></td>
               <td><%= l(user.designated_work_end_time, format: :time) %></td>
               <td>
-                  <% if a.finished_plan_at.present? && a.started_at.present? %>
-                    <%= today_times(a.started_at, a.finished_plan_at, @user.basic_work_time) %>
-                  <% elsif a.finished_plan_at.present? %>
-                    <%= today_times(a.started_at, a.finished_at, @user.basic_work_time) %>
-                  <% end %>
+                <% if day.finished_plan_at.present? && day.tomorrow == false %>
+                  <%= today_times(@user.designated_work_end_time.floor_to(60*15), day.finished_plan_at.floor_to(60*15)) %>
+                <% elsif day.finished_plan_at.present? && day.tomorrow == true %>
+                  <%= tomorrow_times(@user.designated_work_end_time.floor_to(60*15), day.finished_plan_at.floor_to(60*15)) %>
+                <% end %>
+                  <!--< % if a.finished_plan_at.present? && a.started_at.present? %>-->
+                  <!--  　< %= today_times(a.started_at, a.finished_plan_at, @user.basic_work_time) %>-->
+                  <!--< % elsif a.finished_plan_at.present? %>-->
+                  <!--  < %= today_times(a.started_at, a.finished_at, @user.basic_work_time) %>-->
+                  <!--< % end %>-->
               </td>
               <td><%= a.business_process_content %></td>
               <td><%= i.select :mark_instructor_confirmation, Attendance.mark_instructor_confirmations.keys, { include_blank: true } %></td>

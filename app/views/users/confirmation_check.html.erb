@@ -139,11 +139,16 @@
             <% end %>
           </td>
           <td colspan = "2">
-             <% if day.finished_plan_at.present? && day.started_at.present? %>
-              <%= over_times(day.started_at, day.finished_plan_at, @user.basic_work_time) %>
-             <% elsif day.finished_plan_at.present? && day.started_at.present? %>
-              <%= over_times(day.started_at, day.finished_at, @user.basic_work_time) %>
-             <% end %>
+            <% if day.finished_plan_at.present? && day.tomorrow == false %>
+                  <%= today_times(@user.designated_work_end_time.floor_to(60*15), day.finished_plan_at.floor_to(60*15)) %>
+            <% elsif day.finished_plan_at.present? && day.tomorrow == true %>
+                  <%= tomorrow_times(@user.designated_work_end_time.floor_to(60*15), day.finished_plan_at.floor_to(60*15)) %>
+            <% end %>
+             <!--< % if day.finished_plan_at.present? && day.started_at.present? %>-->
+             <!-- < %= over_times(day.started_at, day.finished_plan_at, @user.basic_work_time) %>-->
+             <!--< % elsif day.finished_plan_at.present? && day.started_at.present? %>-->
+             <!-- < %= over_times(day.started_at, day.finished_at, @user.basic_work_time) %>-->
+             <!--< % end %>-->
           </td>
           <td colspan = "2">
             <% if day.business_process_content.present? %>
